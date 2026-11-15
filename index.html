@@ -72,6 +72,15 @@ summary{cursor:pointer;font-weight:600;padding:8px 0}
 .route .openmap{font:inherit;display:block;width:100%;text-align:center;font-weight:700;padding:12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-accent);cursor:pointer}
 .route .alt{display:block;text-align:center;font-weight:600;font-size:.9rem;text-decoration:none;padding:9px;border-radius:10px;border:1.5px solid var(--line);color:var(--accent)}
 .route .alt[aria-disabled=true]{opacity:.45;pointer-events:none}
+.ac{position:relative}
+.sug{position:absolute;left:0;right:0;top:100%;margin:4px 0 0;padding:4px;list-style:none;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.22);z-index:30;max-height:270px;overflow:auto}
+.sug li{padding:9px 10px;border-radius:8px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}
+.sug li::before{content:"📍";grid-row:1/3;font-size:1rem}
+.sug li[aria-selected=true],.sug li:hover{background:var(--bg)}
+.sug b{font-weight:600;line-height:1.25}
+.sug small{grid-column:2;color:var(--mute);font-size:.8rem;line-height:1.25}
+.sug li.sugmsg{display:block;cursor:default;color:var(--mute);font-size:.88rem}
+.sug li.sugmsg::before{content:none}
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
 .tabs button{padding:8px 2px;font-size:.9rem}
 .rt{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -182,11 +191,11 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
         <input type="range" id="km" min="0.5" max="15" step="0.5" value="2" aria-label="Distance in kilometers">
         <p class="hint">Not sure how far? Find your stop in the <a href="#matrix">fare matrix</a> and tap its km, or use the route finder below.</p>
         <div class="route">
-          <input type="text" id="from" placeholder="From (type, or pin it on the map)" aria-label="Starting point" autocomplete="off">
-          <input type="text" id="to" placeholder="To (type, or pin it on the map)" aria-label="Destination" autocomplete="off">
+          <div class="ac"><input type="text" id="from" placeholder="From (type, or pin it on the map)" aria-label="Starting point" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugFrom"><ul class="sug" id="sugFrom" role="listbox" hidden></ul></div>
+          <div class="ac"><input type="text" id="to" placeholder="To (type, or pin it on the map)" aria-label="Destination" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugTo"><ul class="sug" id="sugTo" role="listbox" hidden></ul></div>
           <button type="button" class="openmap" id="openMap">📍 Pin it on the map</button>
           <a class="alt" id="mapLink" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Or open in Google Maps</a>
-          <p class="hint">Pin your start and destination and the distance is set for you. You can also just type places and use Google Maps.</p>
+          <p class="hint">Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Suggestions use OpenStreetMap data.</p>
         </div>
       </div>
 
@@ -367,8 +376,16 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     MP.map=L.map("map").setView([16.6159,120.3209],14);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
     MP.map.on("click",function(e){setPoint(MP.active,e.latlng,true)});
-    // restore pins if the person already typed nothing but we hold points
+    ["from","to"].forEach(ensureMarker);
     updateSeg();
+  }
+  function ensureMarker(k){
+    var p=MP.pts[k];
+    if(!p||!MP.map)return;
+    if(MP.mk[k]){MP.mk[k].setLatLng(p);return}
+    var m=L.marker(p,{draggable:true,icon:pinIcon(k),keyboard:false}).addTo(MP.map);
+    m.on("dragend",function(){setPoint(k,m.getLatLng(),false)});
+    MP.mk[k]=m;
   }
   function removePoint(k){
     MP.pts[k]=null;MP.tok[k]++;
@@ -387,18 +404,10 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
         if(parts.length){$(k).value=parts.join(", ");updateSeg()}
       }).catch(function(){});
   }
-  function setPoint(k,p,advance){
-    if(!MP.map)return;
+  function setPoint(k,p,advance,keepName){
     MP.pts[k]=p;
-    var m=MP.mk[k];
-    if(m)m.setLatLng(p);
-    else{
-      m=L.marker(p,{draggable:true,icon:pinIcon(k),keyboard:false}).addTo(MP.map);
-      m.on("dragend",function(){setPoint(k,m.getLatLng(),false)});
-      MP.mk[k]=m;
-    }
-    $(k).value=fmt(p);
-    labelPoint(k,p);
+    ensureMarker(k);
+    if(!keepName){$(k).value=fmt(p);labelPoint(k,p)}
     if(advance&&k==="from"&&!MP.pts.to)MP.active="to";
     else if(advance&&k==="to"&&!MP.pts.from)MP.active="from";
     updateSeg();updateLink();updateRoute();
@@ -409,9 +418,8 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     info("<strong>"+(approx?"About ":"")+km.toFixed(1)+" km</strong>"+(approx?" in a straight line, plus a margin":" by road")+" · fare set to "+S.km+" km"+(over?" (the checker tops out at 15 km)":"")+".");
   }
   function updateRoute(){
-    if(!MP.map)return;
     var a=MP.pts.from,b=MP.pts.to,t=++MP.rtok;
-    if(MP.line){MP.map.removeLayer(MP.line);MP.line=null}
+    if(MP.line&&MP.map){MP.map.removeLayer(MP.line);MP.line=null}
     if(!a||!b){
       info(!a&&!b?"Tap the map to drop your starting pin (A).":a?"Now tap your destination (B).":"Tap the map to set your starting point (A).");
       return;
@@ -423,19 +431,24 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
         if(t!==MP.rtok)return;
         var r=d.routes&&d.routes[0];
         if(!r)throw new Error("no route");
-        MP.line=L.geoJSON(r.geometry,{style:{color:"#0f5f8c",weight:5,opacity:.85}}).addTo(MP.map);
-        MP.map.fitBounds(MP.line.getBounds(),{padding:[60,60]});
+        if(MP.map){
+          MP.line=L.geoJSON(r.geometry,{style:{color:"#0f5f8c",weight:5,opacity:.85}}).addTo(MP.map);
+          MP.map.fitBounds(MP.line.getBounds(),{padding:[60,60]});
+        }
         applyKm(r.distance/1000,false);
       }).catch(function(){
         if(t!==MP.rtok)return;
-        applyKm(MP.map.distance(a,b)/1000*1.3,true);
+        var m=Math.PI/180,dl=(b.lat-a.lat)*m,dg=(b.lng-a.lng)*m;
+        var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lat*m)*Math.cos(b.lat*m)*Math.sin(dg/2)*Math.sin(dg/2);
+        applyKm(6371*2*Math.asin(Math.sqrt(h))*1.3,true);
       });
   }
   function openMap(){
     document.body.classList.add("map-open");
     $("mapPanel").setAttribute("aria-hidden","false");
     initMap();updateSeg();
-    setTimeout(function(){MP.map&&MP.map.invalidateSize()},580);
+    hideSug("from");hideSug("to");
+    setTimeout(function(){if(!MP.map)return;MP.map.invalidateSize();if(MP.pts.from&&MP.pts.to)updateRoute();else{var one=MP.pts.from||MP.pts.to;if(one)MP.map.setView(one,16)}},580);
     $("mapClose").focus({preventScroll:true});
   }
   function closeMap(quiet){
@@ -465,10 +478,86 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   });
   $("segFrom").addEventListener("click",function(){selectActive("from")});
   $("segTo").addEventListener("click",function(){selectActive("to")});
+  /* ---------- place suggestions (Photon / OpenStreetMap), biased to San Fernando ---------- */
+  var SUG={t:{},ctl:{},items:{},sel:{from:-1,to:-1},cache:{}};
+  function sugEl(k){return $(k==="from"?"sugFrom":"sugTo")}
+  function hideSug(k){sugEl(k).hidden=true;$(k).setAttribute("aria-expanded","false");$(k).removeAttribute("aria-activedescendant");SUG.sel[k]=-1}
+  function showSug(k,html){var u=sugEl(k);u.innerHTML=html;u.hidden=false;$(k).setAttribute("aria-expanded","true")}
+  function renderSug(k){
+    var it=SUG.items[k]||[];
+    if(!it.length){showSug(k,'<li class="sugmsg">No matching places nearby. You can still pin it on the map.</li>');return}
+    showSug(k,it.map(function(x,i){
+      return '<li role="option" id="sug'+k+i+'" data-i="'+i+'" aria-selected="'+(i===SUG.sel[k])+'"><b>'+esc(x.name)+'</b>'+(x.sub?'<small>'+esc(x.sub)+'</small>':'')+'</li>';
+    }).join(""));
+  }
+  function fetchSug(k,q){
+    if(SUG.ctl[k])SUG.ctl[k].abort();
+    if(q.length<2){hideSug(k);return}
+    var key=q.toLowerCase();
+    if(SUG.cache[key]){SUG.items[k]=SUG.cache[key];SUG.sel[k]=-1;renderSug(k);return}
+    var ctl=window.AbortController?new AbortController():null;
+    SUG.ctl[k]=ctl;
+    showSug(k,'<li class="sugmsg">Searching…</li>');
+    fetch("https://photon.komoot.io/api/?lang=en&limit=7&lat=16.6159&lon=120.3209&bbox=120.15,16.45,120.50,16.80&q="+encodeURIComponent(q),ctl?{signal:ctl.signal}:{})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        var seen={},out=[];
+        (d.features||[]).forEach(function(f){
+          var p=f.properties||{},c=f.geometry&&f.geometry.coordinates;
+          if(!c)return;
+          var name=p.name||[p.housenumber,p.street].filter(Boolean).join(" ");
+          if(!name)return;
+          var st=p.name&&p.street?(p.housenumber?p.housenumber+" ":"")+p.street:"";
+          var sub=[st,p.district||p.locality,p.city||p.county].filter(function(x,i,a){return x&&x!==name&&a.indexOf(x)===i}).join(", ");
+          var id=name+"|"+sub;
+          if(seen[id])return;
+          seen[id]=1;out.push({name:name,sub:sub,lat:c[1],lng:c[0]});
+        });
+        SUG.cache[key]=out;SUG.items[k]=out;SUG.sel[k]=-1;
+        if(document.activeElement===$(k))renderSug(k);
+      }).catch(function(e){
+        if(e&&e.name==="AbortError")return;
+        showSug(k,'<li class="sugmsg">Suggestions unavailable right now. You can still type a place or pin it on the map.</li>');
+      });
+  }
+  function pickSug(k,i){
+    var x=(SUG.items[k]||[])[i];
+    if(!x)return;
+    var p={lat:x.lat,lng:x.lng};
+    $(k).value=x.name;
+    hideSug(k);
+    setPoint(k,p,true,true);
+    if(MP.map&&document.body.classList.contains("map-open")&&!(MP.pts.from&&MP.pts.to))MP.map.setView(p,16);
+  }
   ["from","to"].forEach(function(k){
-    $(k).addEventListener("input",function(){
+    var inp=$(k);
+    inp.addEventListener("input",function(){
       if(MP.pts[k]){removePoint(k);updateRoute()}
       updateSeg();updateLink();
+      clearTimeout(SUG.t[k]);
+      SUG.t[k]=setTimeout(function(){fetchSug(k,inp.value.trim())},250);
+    });
+    inp.addEventListener("keydown",function(e){
+      var n=(SUG.items[k]||[]).length;
+      if(sugEl(k).hidden||!n)return;
+      if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+        e.preventDefault();
+        var c=SUG.sel[k];
+        SUG.sel[k]=e.key==="ArrowDown"?(c+1)%n:(c<=0?n-1:c-1);
+        renderSug(k);
+        inp.setAttribute("aria-activedescendant","sug"+k+SUG.sel[k]);
+      }else if(e.key==="Enter"&&SUG.sel[k]>=0){
+        e.preventDefault();pickSug(k,SUG.sel[k]);
+      }else if(e.key==="Escape"){
+        hideSug(k);e.stopPropagation();
+      }
+    });
+    inp.addEventListener("blur",function(){setTimeout(function(){hideSug(k)},200)});
+    inp.addEventListener("focus",function(){if((SUG.items[k]||[]).length&&inp.value.trim().length>=2&&!MP.pts[k])renderSug(k)});
+    sugEl(k).addEventListener("mousedown",function(e){e.preventDefault()});
+    sugEl(k).addEventListener("click",function(e){
+      var li=e.target.closest("li[data-i]");
+      if(li)pickSug(k,parseInt(li.dataset.i,10));
     });
   });
   document.addEventListener("keydown",function(e){if(e.key==="Escape")closeMap()});
