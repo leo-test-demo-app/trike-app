@@ -195,7 +195,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
           <div class="ac"><input type="text" id="to" placeholder="To (type, or pin it on the map)" aria-label="Destination" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugTo"><ul class="sug" id="sugTo" role="listbox" hidden></ul></div>
           <button type="button" class="openmap" id="openMap">📍 Pin it on the map</button>
           <a class="alt" id="mapLink" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Or open in Google Maps</a>
-          <p class="hint">Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Suggestions use OpenStreetMap data.</p>
+          <p class="hint">Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Only places inside San Fernando City can be used. Suggestions use OpenStreetMap data.</p>
         </div>
       </div>
 
@@ -339,6 +339,54 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 
   /* ---------- map picker (Leaflet + OpenStreetMap) ---------- */
   var MP={map:null,active:"from",pts:{from:null,to:null},mk:{},line:null,tok:{from:0,to:0},rtok:0};
+  /* ---------- keep everything inside San Fernando City ---------- */
+  var CITY={polys:null}, CKEY="sf-boundary-v1";
+  var FB={w:120.25,s:16.53,e:120.43,n:16.72}; // fallback box if the boundary can’t load
+  function inRing(x,y,r){
+    var c=false;
+    for(var i=0,j=r.length-1;i<r.length;j=i++){
+      var xi=r[i][0],yi=r[i][1],xj=r[j][0],yj=r[j][1];
+      if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;
+    }
+    return c;
+  }
+  function inPoly(x,y,pg){
+    if(!inRing(x,y,pg[0]))return false;
+    for(var i=1;i<pg.length;i++)if(inRing(x,y,pg[i]))return false;
+    return true;
+  }
+  function inCity(p){
+    if(CITY.polys){
+      for(var i=0;i<CITY.polys.length;i++)if(inPoly(p.lng,p.lat,CITY.polys[i]))return true;
+      return false;
+    }
+    return p.lat>=FB.s&&p.lat<=FB.n&&p.lng>=FB.w&&p.lng<=FB.e;
+  }
+  function drawBoundary(){
+    if(!MP.map||!CITY.polys||MP.bnd)return;
+    MP.bnd=L.geoJSON({type:"MultiPolygon",coordinates:CITY.polys},{style:{color:"#0f5f8c",weight:2,dashArray:"6 6",fillOpacity:.05},interactive:false}).addTo(MP.map);
+    MP.map.setMaxBounds(MP.bnd.getBounds().pad(.35));
+  }
+  function useBoundary(g){
+    var polys=g&&g.type==="Polygon"?[g.coordinates]:g&&g.type==="MultiPolygon"?g.coordinates:null;
+    if(!polys)return false;
+    var ok=polys.every(function(pg){return pg[0].every(function(c){return c[0]>120.1&&c[0]<120.6&&c[1]>16.4&&c[1]<16.85})});
+    if(!ok)return false;
+    CITY.polys=polys;drawBoundary();return true;
+  }
+  function loadCity(){
+    try{var c=JSON.parse(localStorage.getItem(CKEY)||"null");if(c&&useBoundary(c))return}catch(e){}
+    fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&polygon_geojson=1&polygon_threshold=0.0004&limit=5&accept-language=en&q="+encodeURIComponent("San Fernando, La Union, Philippines"))
+      .then(function(r){return r.json()})
+      .then(function(d){
+        for(var i=0;i<d.length;i++){
+          if(d[i].geojson&&useBoundary(d[i].geojson)){
+            try{localStorage.setItem(CKEY,JSON.stringify(d[i].geojson))}catch(e){}
+            return;
+          }
+        }
+      }).catch(function(){});
+  }
   var AREA=", San Fernando, La Union, Philippines";
   function place(t){return /la union|san fernando/i.test(t)?t:t+AREA}
   function ll(p){return p.lat.toFixed(6)+","+p.lng.toFixed(6)}
@@ -373,10 +421,11 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     var msg=$("mapMsg");
     if(!window.L){msg.textContent="The map couldn’t load. Check your internet connection, then close and reopen this panel.";msg.hidden=false;return}
     msg.hidden=true;
-    MP.map=L.map("map").setView([16.6159,120.3209],14);
+    MP.map=L.map("map",{minZoom:10}).setView([16.6159,120.3209],14);
+    MP.map.setMaxBounds(L.latLngBounds([[FB.s,FB.w],[FB.n,FB.e]]).pad(.6));
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
     MP.map.on("click",function(e){setPoint(MP.active,e.latlng,true)});
-    ["from","to"].forEach(ensureMarker);
+    drawBoundary();["from","to"].forEach(ensureMarker);
     updateSeg();
   }
   function ensureMarker(k){
@@ -384,7 +433,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     if(!p||!MP.map)return;
     if(MP.mk[k]){MP.mk[k].setLatLng(p);return}
     var m=L.marker(p,{draggable:true,icon:pinIcon(k),keyboard:false}).addTo(MP.map);
-    m.on("dragend",function(){setPoint(k,m.getLatLng(),false)});
+    m.on("dragend",function(){if(setPoint(k,m.getLatLng(),false)===false)m.setLatLng(MP.pts[k])});
     MP.mk[k]=m;
   }
   function removePoint(k){
@@ -405,12 +454,17 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
       }).catch(function(){});
   }
   function setPoint(k,p,advance,keepName){
+    if(!inCity(p)){
+      info("That spot is outside <strong>San Fernando City</strong>. Please choose a place inside the city.");
+      return false;
+    }
     MP.pts[k]=p;
     ensureMarker(k);
     if(!keepName){$(k).value=fmt(p);labelPoint(k,p)}
     if(advance&&k==="from"&&!MP.pts.to)MP.active="to";
     else if(advance&&k==="to"&&!MP.pts.from)MP.active="from";
     updateSeg();updateLink();updateRoute();
+    return true;
   }
   function applyKm(km,approx){
     var r=Math.max(0.5,Math.ceil(km*2)/2), over=r>15;
@@ -485,7 +539,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   function showSug(k,html){var u=sugEl(k);u.innerHTML=html;u.hidden=false;$(k).setAttribute("aria-expanded","true")}
   function renderSug(k){
     var it=SUG.items[k]||[];
-    if(!it.length){showSug(k,'<li class="sugmsg">No matching places nearby. You can still pin it on the map.</li>');return}
+    if(!it.length){showSug(k,'<li class="sugmsg">No matching places inside San Fernando City. Try another name or pin it on the map.</li>');return}
     showSug(k,it.map(function(x,i){
       return '<li role="option" id="sug'+k+i+'" data-i="'+i+'" aria-selected="'+(i===SUG.sel[k])+'"><b>'+esc(x.name)+'</b>'+(x.sub?'<small>'+esc(x.sub)+'</small>':'')+'</li>';
     }).join(""));
@@ -498,19 +552,20 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     var ctl=window.AbortController?new AbortController():null;
     SUG.ctl[k]=ctl;
     showSug(k,'<li class="sugmsg">Searching…</li>');
-    fetch("https://photon.komoot.io/api/?lang=en&limit=7&lat=16.6159&lon=120.3209&bbox=120.15,16.45,120.50,16.80&q="+encodeURIComponent(q),ctl?{signal:ctl.signal}:{})
+    fetch("https://photon.komoot.io/api/?lang=en&limit=15&lat=16.6159&lon=120.3209&bbox=120.22,16.50,120.46,16.75&q="+encodeURIComponent(q),ctl?{signal:ctl.signal}:{})
       .then(function(r){return r.json()})
       .then(function(d){
         var seen={},out=[];
         (d.features||[]).forEach(function(f){
           var p=f.properties||{},c=f.geometry&&f.geometry.coordinates;
-          if(!c)return;
+          if(!c||!inCity({lat:c[1],lng:c[0]}))return;
           var name=p.name||[p.housenumber,p.street].filter(Boolean).join(" ");
           if(!name)return;
           var st=p.name&&p.street?(p.housenumber?p.housenumber+" ":"")+p.street:"";
           var sub=[st,p.district||p.locality,p.city||p.county].filter(function(x,i,a){return x&&x!==name&&a.indexOf(x)===i}).join(", ");
           var id=name+"|"+sub;
           if(seen[id])return;
+          if(out.length>=7)return;
           seen[id]=1;out.push({name:name,sub:sub,lat:c[1],lng:c[0]});
         });
         SUG.cache[key]=out;SUG.items[k]=out;SUG.sel[k]=-1;
@@ -564,6 +619,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   window.addEventListener("resize",function(){MP.map&&MP.map.invalidateSize()});
   $("mapPanel").addEventListener("transitionend",function(e){if(e.propertyName==="transform"&&MP.map)MP.map.invalidateSize()});
   updateLink();
+  loadCity();
 
   /* ---------- fare matrix data (San Fernando City, La Union) ----------
      stop = [km, barangay, location]; fares come from the rates above.
