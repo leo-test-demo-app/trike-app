@@ -257,6 +257,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
       <button type="button" id="segTo" aria-pressed="false"><i class="dot to"></i><b>To</b><span>Tap the map</span></button>
     </div>
     <div class="mrow"><button type="button" class="ghost" id="mapLoc">📍 Use my location</button><button type="button" class="ghost" id="mapClear">Clear pins</button></div>
+    <p class="hint" style="margin:0">The <strong style="color:#e11d2e">red shaded area</strong> (including the sea) is outside San Fernando City.</p>
   </div>
   <div class="mapwrap"><div id="map"></div><p id="mapMsg" class="mapmsg" hidden></p></div>
   <footer class="mapf">
@@ -343,7 +344,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   /* ---------- map picker (Leaflet + OpenStreetMap) ---------- */
   var MP={map:null,active:"from",pts:{from:null,to:null},mk:{},line:null,tok:{from:0,to:0},rtok:0};
   /* ---------- keep everything inside San Fernando City ---------- */
-  var CITY={polys:null,exact:false,busy:false}, CKEY="sf-boundary-v2";
+  var CITY={polys:null,exact:false,busy:false,coast:null,cbusy:false}, CKEY="sf-boundary-v2", COKEY="sf-coast-v1";
   var FB={w:120.26,s:16.55,e:120.43,n:16.70}; // fallback box if the boundary can’t load
   function inRing(x,y,r){
     var c=false;
@@ -358,29 +359,54 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     for(var i=1;i<pg.length;i++)if(inRing(x,y,pg[i]))return false;
     return true;
   }
-  function inCity(p){
-    if(CITY.polys){
-      for(var i=0;i<CITY.polys.length;i++)if(inPoly(p.lng,p.lat,CITY.polys[i]))return true;
-      return false;
-    }
-    return p.lat>=FB.s&&p.lat<=FB.n&&p.lng>=FB.w&&p.lng<=FB.e;
+  // Land test: OSM coastlines are drawn with land on the LEFT of the line, so a point
+  // is on land if it sits left of its nearest coastline segment.
+  function isLand(p){
+    if(!CITY.coast)return true;
+    var k=Math.cos(p.lat*Math.PI/180),px=p.lng*k,py=p.lat,best=1e9,sign=1;
+    CITY.coast.forEach(function(ch){
+      for(var i=0;i<ch.length-1;i++){
+        var ax=ch[i][1]*k,ay=ch[i][0],bx=ch[i+1][1]*k,by=ch[i+1][0];
+        var dx=bx-ax,dy=by-ay,l2=dx*dx+dy*dy;
+        if(!l2)continue;
+        var t=((px-ax)*dx+(py-ay)*dy)/l2;t=t<0?0:t>1?1:t;
+        var qx=ax+t*dx-px,qy=ay+t*dy-py,d=qx*qx+qy*qy;
+        if(d<best){best=d;sign=dx*(py-ay)-dy*(px-ax)}
+      }
+    });
+    return sign>=0;
   }
+  function inCity(p){
+    var inside=false;
+    if(CITY.polys){
+      for(var i=0;i<CITY.polys.length&&!inside;i++)if(inPoly(p.lng,p.lat,CITY.polys[i]))inside=true;
+    }else inside=p.lat>=FB.s&&p.lat<=FB.n&&p.lng>=FB.w&&p.lng<=FB.e;
+    return inside&&isLand(p);
+  }
+  function seaRing(ch){
+    var a=ch[0],z=ch[ch.length-1],dx=z[1]-a[1],dy=z[0]-a[0],l=Math.sqrt(dx*dx+dy*dy)||1;
+    var rx=dy/l*0.6,ry=-dx/l*0.6; // right-hand side of the coastline = the sea
+    return ch.concat([[z[0]+ry,z[1]+rx],[a[0]+ry,a[1]+rx]]);
+  }
+  // red overlay: everything outside the city, plus the sea inside the city limits
   function drawBoundary(){
-    if(!MP.map||!CITY.polys||MP.bnd)return;
+    if(!MP.map||!CITY.polys)return;
+    if(MP.bnd){MP.map.removeLayer(MP.bnd);MP.bnd=null}
+    if(!MP.map.getPane("sfmask")){
+      var pn=MP.map.createPane("sfmask");
+      pn.style.zIndex=450;pn.style.opacity=.42;pn.style.pointerEvents="none";
+    }
     var rings=CITY.polys.map(function(pg){return pg[0].map(function(c){return [c[1],c[0]]})});
-    var b=L.polygon(rings).getBounds(), o=b.pad(2);
+    var b=L.polygon(rings).getBounds(),o=b.pad(2);
     var outer=[[o.getSouth(),o.getWest()],[o.getSouth(),o.getEast()],[o.getNorth(),o.getEast()],[o.getNorth(),o.getWest()]];
-    var bg=(getComputedStyle(document.documentElement).getPropertyValue("--bg")||"#eef2f5").trim();
-    // solid cover everywhere except inside the city, so outside the boundary is just blank
-    MP.bnd=L.layerGroup([
-      L.polygon([outer].concat(rings),{stroke:false,fillColor:bg,fillOpacity:1,interactive:false}),
-      L.polygon(rings,{color:"#0f5f8c",weight:2,fill:false,interactive:false})
-    ]).addTo(MP.map);
-    var lim=b.pad(.06);
+    var st={pane:"sfmask",stroke:false,fillColor:"#e11d2e",fillOpacity:1,interactive:false};
+    var layers=[L.polygon([outer].concat(rings),st)];
+    (CITY.coast||[]).forEach(function(ch){layers.push(L.polygon(seaRing(ch),st))});
+    MP.bnd=L.layerGroup(layers).addTo(MP.map);
+    var lim=b.pad(.35);
     MP.map.setMaxBounds(lim);
     MP.map.setMinZoom(Math.max(9,MP.map.getBoundsZoom(lim)));
-    if(MP.tiles){MP.tiles.options.bounds=lim;MP.tiles.redraw()}
-    if(!MP.pts.from&&!MP.pts.to)MP.map.fitBounds(b);
+    if(!MP.fitted&&!MP.pts.from&&!MP.pts.to){MP.fitted=true;MP.map.fitBounds(b)}
   }
   function useBoundary(g){
     var polys=g&&g.type==="Polygon"?[g.coordinates]:g&&g.type==="MultiPolygon"?g.coordinates:null;
@@ -408,6 +434,51 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
             try{localStorage.setItem(CKEY,JSON.stringify(d[j].geojson))}catch(e){}
             CITY.busy=false;return;
           }
+        }
+        next(i+1);
+      }).catch(function(){next(i+1)});
+    })(0);
+  }
+  /* ---------- coastline, so water doesn’t count as part of the city ---------- */
+  function buildCoast(els){
+    var ways=els.filter(function(e){return e.geometry&&e.geometry.length>1}).map(function(e){return e.geometry.map(function(g){return [g.lat,g.lon]})});
+    var byStart={},ends={},used={},out=[];
+    ways.forEach(function(w,i){byStart[w[0].join()]=i;ends[w[w.length-1].join()]=1});
+    ways.forEach(function(w,i){
+      if(ends[w[0].join()]||used[i])return;
+      used[i]=1;
+      var c=w.slice(),j=byStart[c[c.length-1].join()];
+      while(j!==undefined&&!used[j]){used[j]=1;c=c.concat(ways[j].slice(1));j=byStart[c[c.length-1].join()]}
+      out.push(c);
+    });
+    return out.map(function(c){
+      var f=-1,l=-1;
+      for(var i=0;i<c.length;i++){
+        if(c[i][0]>=16.45&&c[i][0]<=16.80&&c[i][1]>=120.15&&c[i][1]<=120.45){if(f<0)f=i;l=i}
+      }
+      if(f<0)return [];
+      return c.slice(Math.max(0,f-1),l+2).map(function(q){return [Math.round(q[0]*1e5)/1e5,Math.round(q[1]*1e5)/1e5]});
+    }).filter(function(c){return c.length>1});
+  }
+  function useCoast(chs){
+    function test(c){CITY.coast=c;return isLand({lat:16.62,lng:120.40})&&!isLand({lat:16.62,lng:120.20})}
+    var rev=chs.map(function(c){return c.slice().reverse()});
+    if(test(chs)||test(rev)){drawBoundary();return true}
+    CITY.coast=null;return false;
+  }
+  function loadCoast(){
+    try{var c=JSON.parse(localStorage.getItem(COKEY)||"null");if(c&&c.length&&useCoast(c))return}catch(e){}
+    if(CITY.cbusy)return;
+    CITY.cbusy=true;
+    var q='[out:json][timeout:30];way["natural"="coastline"](16.45,120.15,16.80,120.45);out geom;';
+    var hosts=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
+    (function next(i){
+      if(i>=hosts.length){CITY.cbusy=false;return}
+      fetch(hosts[i]+"?data="+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(d){
+        var ch=buildCoast(d.elements||[]);
+        if(ch.length&&useCoast(ch)){
+          try{localStorage.setItem(COKEY,JSON.stringify(CITY.coast))}catch(e){}
+          CITY.cbusy=false;return;
         }
         next(i+1);
       }).catch(function(){next(i+1)});
@@ -488,7 +559,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   }
   function setPoint(k,p,advance,keepName){
     if(!inCity(p)){
-      info("That spot is outside <strong>San Fernando City</strong>. Please choose a place inside the city.");
+      info("That spot is outside <strong>San Fernando City</strong> (or on the water). Please choose a place on land inside the city.");
       return false;
     }
     MP.pts[k]=p;
@@ -535,6 +606,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     $("mapPanel").setAttribute("aria-hidden","false");
     initMap();updateSeg();
     if(!CITY.exact)loadCity();
+    if(!CITY.coast)loadCoast();
     hideSug("from");hideSug("to");
     setTimeout(function(){if(!MP.map)return;MP.map.invalidateSize();if(MP.pts.from&&MP.pts.to)updateRoute();else{var one=MP.pts.from||MP.pts.to;if(one)MP.map.setView(one,16)}},580);
     $("mapClose").focus({preventScroll:true});
@@ -653,7 +725,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   window.addEventListener("resize",function(){MP.map&&MP.map.invalidateSize()});
   $("mapPanel").addEventListener("transitionend",function(e){if(e.propertyName==="transform"&&MP.map)MP.map.invalidateSize()});
   updateLink();
-  loadCity();
+  loadCity();loadCoast();
 
   /* ---------- fare matrix data (San Fernando City, La Union) ----------
      stop = [km, barangay, location]; fares come from the rates above.
