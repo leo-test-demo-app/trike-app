@@ -72,6 +72,8 @@ summary{cursor:pointer;font-weight:600;padding:8px 0}
 .route .openmap{font:inherit;display:block;width:100%;text-align:center;font-weight:700;padding:12px;border-radius:10px;border:0;background:var(--accent);color:var(--on-accent);cursor:pointer}
 .route .alt{display:block;text-align:center;font-weight:600;font-size:.9rem;text-decoration:none;padding:9px;border-radius:10px;border:1.5px solid var(--line);color:var(--accent)}
 .route .alt[aria-disabled=true]{opacity:.45;pointer-events:none}
+.warn{color:#b3261e;font-weight:600}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .warn{color:#ff8a80}}
 .ac{position:relative}
 .sug{position:absolute;left:0;right:0;top:100%;margin:4px 0 0;padding:4px;list-style:none;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.22);z-index:30;max-height:270px;overflow:auto}
 .sug li{padding:9px 10px;border-radius:8px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center}
@@ -193,6 +195,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
         <div class="route">
           <div class="ac"><input type="text" id="from" placeholder="From (type, or pin it on the map)" aria-label="Starting point" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugFrom"><ul class="sug" id="sugFrom" role="listbox" hidden></ul></div>
           <div class="ac"><input type="text" id="to" placeholder="To (type, or pin it on the map)" aria-label="Destination" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugTo"><ul class="sug" id="sugTo" role="listbox" hidden></ul></div>
+          <p class="hint warn" id="routeMsg" hidden></p>
           <button type="button" class="openmap" id="openMap">📍 Pin it on the map</button>
           <a class="alt" id="mapLink" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Or open in Google Maps</a>
           <p class="hint">Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Only places inside San Fernando City can be used. Suggestions use OpenStreetMap data.</p>
@@ -340,8 +343,8 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   /* ---------- map picker (Leaflet + OpenStreetMap) ---------- */
   var MP={map:null,active:"from",pts:{from:null,to:null},mk:{},line:null,tok:{from:0,to:0},rtok:0};
   /* ---------- keep everything inside San Fernando City ---------- */
-  var CITY={polys:null}, CKEY="sf-boundary-v1";
-  var FB={w:120.25,s:16.53,e:120.43,n:16.72}; // fallback box if the boundary can’t load
+  var CITY={polys:null,exact:false,busy:false}, CKEY="sf-boundary-v2";
+  var FB={w:120.26,s:16.55,e:120.43,n:16.70}; // fallback box if the boundary can’t load
   function inRing(x,y,r){
     var c=false;
     for(var i=0,j=r.length-1;i<r.length;j=i++){
@@ -364,28 +367,51 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   }
   function drawBoundary(){
     if(!MP.map||!CITY.polys||MP.bnd)return;
-    MP.bnd=L.geoJSON({type:"MultiPolygon",coordinates:CITY.polys},{style:{color:"#0f5f8c",weight:2,dashArray:"6 6",fillOpacity:.05},interactive:false}).addTo(MP.map);
-    MP.map.setMaxBounds(MP.bnd.getBounds().pad(.35));
+    var rings=CITY.polys.map(function(pg){return pg[0].map(function(c){return [c[1],c[0]]})});
+    var b=L.polygon(rings).getBounds(), o=b.pad(2);
+    var outer=[[o.getSouth(),o.getWest()],[o.getSouth(),o.getEast()],[o.getNorth(),o.getEast()],[o.getNorth(),o.getWest()]];
+    var bg=(getComputedStyle(document.documentElement).getPropertyValue("--bg")||"#eef2f5").trim();
+    // solid cover everywhere except inside the city, so outside the boundary is just blank
+    MP.bnd=L.layerGroup([
+      L.polygon([outer].concat(rings),{stroke:false,fillColor:bg,fillOpacity:1,interactive:false}),
+      L.polygon(rings,{color:"#0f5f8c",weight:2,fill:false,interactive:false})
+    ]).addTo(MP.map);
+    var lim=b.pad(.06);
+    MP.map.setMaxBounds(lim);
+    MP.map.setMinZoom(Math.max(9,MP.map.getBoundsZoom(lim)));
+    if(MP.tiles){MP.tiles.options.bounds=lim;MP.tiles.redraw()}
+    if(!MP.pts.from&&!MP.pts.to)MP.map.fitBounds(b);
   }
   function useBoundary(g){
     var polys=g&&g.type==="Polygon"?[g.coordinates]:g&&g.type==="MultiPolygon"?g.coordinates:null;
     if(!polys)return false;
-    var ok=polys.every(function(pg){return pg[0].every(function(c){return c[0]>120.1&&c[0]<120.6&&c[1]>16.4&&c[1]<16.85})});
-    if(!ok)return false;
-    CITY.polys=polys;drawBoundary();return true;
+    var w=999,e=-999,so=999,n=-999;
+    polys.forEach(function(pg){pg[0].forEach(function(c){
+      if(c[0]<w)w=c[0];if(c[0]>e)e=c[0];if(c[1]<so)so=c[1];if(c[1]>n)n=c[1];
+    })});
+    // must be city-sized (not the whole province) and contain the city centre
+    if(!(e-w>0.08&&e-w<0.4&&n-so>0.08&&n-so<0.35))return false;
+    if(!polys.some(function(pg){return inPoly(120.3209,16.6159,pg)}))return false;
+    CITY.polys=polys;CITY.exact=true;drawBoundary();return true;
   }
   function loadCity(){
     try{var c=JSON.parse(localStorage.getItem(CKEY)||"null");if(c&&useBoundary(c))return}catch(e){}
-    fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&polygon_geojson=1&polygon_threshold=0.0004&limit=5&accept-language=en&q="+encodeURIComponent("San Fernando, La Union, Philippines"))
-      .then(function(r){return r.json()})
-      .then(function(d){
-        for(var i=0;i<d.length;i++){
-          if(d[i].geojson&&useBoundary(d[i].geojson)){
-            try{localStorage.setItem(CKEY,JSON.stringify(d[i].geojson))}catch(e){}
-            return;
+    if(CITY.busy)return;
+    CITY.busy=true;
+    var base="https://nominatim.openstreetmap.org/search?format=jsonv2&polygon_geojson=1&polygon_threshold=0.0003&limit=5&accept-language=en&";
+    var tries=[base+"city=San%20Fernando&state=La%20Union&country=Philippines",base+"q="+encodeURIComponent("San Fernando City, La Union, Philippines")];
+    (function next(i){
+      if(i>=tries.length){CITY.busy=false;return}
+      fetch(tries[i]).then(function(r){return r.json()}).then(function(d){
+        for(var j=0;j<d.length;j++){
+          if(d[j].geojson&&useBoundary(d[j].geojson)){
+            try{localStorage.setItem(CKEY,JSON.stringify(d[j].geojson))}catch(e){}
+            CITY.busy=false;return;
           }
         }
-      }).catch(function(){});
+        next(i+1);
+      }).catch(function(){next(i+1)});
+    })(0);
   }
   var AREA=", San Fernando, La Union, Philippines";
   function place(t){return /la union|san fernando/i.test(t)?t:t+AREA}
@@ -394,12 +420,19 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
   function info(h){$("mapInfo").innerHTML=h}
 
   function updateLink(){
-    var f=$("from").value.trim(), t=$("to").value.trim(), a=$("mapLink");
-    var dest=MP.pts.to?ll(MP.pts.to):(t?place(t):"");
-    if(dest){
-      var url="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(dest);
-      var org=MP.pts.from?ll(MP.pts.from):(f?place(f):"");
-      if(org)url+="&origin="+encodeURIComponent(org);
+    var a=$("mapLink"),bad=[];
+    ["from","to"].forEach(function(k){
+      if($(k).value.trim()&&!MP.pts[k]&&document.activeElement!==$(k))bad.push(k);
+    });
+    var m=$("routeMsg");
+    if(bad.length){
+      m.textContent="Choose "+(bad.length>1?"both places":"the "+(bad[0]==="from"?"starting point":"destination"))+" from the suggestions or pin it on the map. Only places inside San Fernando City can be used.";
+      m.hidden=false;
+    }else m.hidden=true;
+    var fromBad=$("from").value.trim()&&!MP.pts.from;
+    if(MP.pts.to&&!fromBad){
+      var url="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(ll(MP.pts.to));
+      if(MP.pts.from)url+="&origin="+encodeURIComponent(ll(MP.pts.from));
       a.href=url;a.removeAttribute("aria-disabled");a.removeAttribute("tabindex");
     }else{
       a.href="#";a.setAttribute("aria-disabled","true");a.setAttribute("tabindex","-1");
@@ -421,9 +454,9 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     var msg=$("mapMsg");
     if(!window.L){msg.textContent="The map couldn’t load. Check your internet connection, then close and reopen this panel.";msg.hidden=false;return}
     msg.hidden=true;
-    MP.map=L.map("map",{minZoom:10}).setView([16.6159,120.3209],14);
+    MP.map=L.map("map",{minZoom:10,maxBoundsViscosity:1}).setView([16.6159,120.3209],14);
     MP.map.setMaxBounds(L.latLngBounds([[FB.s,FB.w],[FB.n,FB.e]]).pad(.6));
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
+    MP.tiles=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
     MP.map.on("click",function(e){setPoint(MP.active,e.latlng,true)});
     drawBoundary();["from","to"].forEach(ensureMarker);
     updateSeg();
@@ -501,6 +534,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
     document.body.classList.add("map-open");
     $("mapPanel").setAttribute("aria-hidden","false");
     initMap();updateSeg();
+    if(!CITY.exact)loadCity();
     hideSug("from");hideSug("to");
     setTimeout(function(){if(!MP.map)return;MP.map.invalidateSize();if(MP.pts.from&&MP.pts.to)updateRoute();else{var one=MP.pts.from||MP.pts.to;if(one)MP.map.setView(one,16)}},580);
     $("mapClose").focus({preventScroll:true});
@@ -607,7 +641,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
         hideSug(k);e.stopPropagation();
       }
     });
-    inp.addEventListener("blur",function(){setTimeout(function(){hideSug(k)},200)});
+    inp.addEventListener("blur",function(){setTimeout(function(){hideSug(k);updateLink()},220)});
     inp.addEventListener("focus",function(){if((SUG.items[k]||[]).length&&inp.value.trim().length>=2&&!MP.pts[k])renderSug(k)});
     sugEl(k).addEventListener("mousedown",function(e){e.preventDefault()});
     sugEl(k).addEventListener("click",function(e){
