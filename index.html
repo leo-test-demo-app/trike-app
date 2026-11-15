@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Magkano ang Pamasahe? San Fernando tricycle fares</title>
+<meta name="description" content="Check the fair tricycle fare in San Fernando City, La Union. Fare checker, full fare matrix, and where to file an overcharge complaint.">
+<meta name="theme-color" content="#1e9be0">
+<meta property="og:title" content="Magkano ang Pamasahe? San Fernando tricycle fares">
+<meta property="og:description" content="Know the fare before you ride. Fare checker, fare matrix and complaints for San Fernando City, La Union.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛺%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
@@ -26,6 +32,7 @@ h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-s
 .sub{color:var(--mute);margin:0 0 14px}
 .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
 .nav a{text-align:center;font-weight:700;font-size:.82rem;text-decoration:none;padding:10px 2px;border-radius:10px;border:1.5px solid var(--line);color:var(--ink)}
+.nav a[aria-current=page]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .feat{display:block;text-decoration:none;color:inherit;margin-top:12px;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 .feat b{display:block;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.1rem}
 .feat span{color:var(--mute);font-size:.92rem}
@@ -34,7 +41,6 @@ h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-s
 .who b{display:block;color:var(--accent)}
 .card h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.3rem;line-height:1.2;margin:0 0 8px}
 .card ul{padding-left:20px;margin:8px 0 0}
-.nav a[aria-current=page]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .plate{background:var(--plate);color:var(--plate-ink);border-radius:14px;padding:18px 18px 16px;border:3px solid var(--plate-ink);box-shadow:0 0 0 3px var(--plate)}
 .plate small{display:block;font-weight:600;font-size:.9rem}
 .amt{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:4.2rem;line-height:1;margin:2px 0 6px;font-variant-numeric:tabular-nums}
@@ -42,13 +48,12 @@ h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-s
 .tip{margin:14px 0 0;padding:12px 14px;border-left:4px solid var(--accent);background:var(--card);border-radius:0 10px 10px 0;font-size:.95rem}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
 .f{margin-bottom:16px}.f:last-child{margin-bottom:0}
-.f[hidden],[hidden]{display:none!important}
+[hidden]{display:none!important}
 .lab{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
 .lab output{color:var(--accent);font-weight:700}
 input[type=range]{width:100%;accent-color:var(--accent);height:32px}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.seg button,.step button,.tabs button{font:inherit;font-weight:600;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:10px;cursor:pointer}
-.seg button[aria-pressed=true],.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg button,.step button,.tabs button,.ghost{font:inherit;font-weight:600;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:10px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .step{display:flex;align-items:center;gap:12px}
 .step button{width:44px;height:44px;font-size:1.3rem;padding:0}
 .step button:disabled{opacity:.4;cursor:not-allowed}
@@ -65,7 +70,6 @@ summary{cursor:pointer;font-weight:600;padding:8px 0}
 .route input{width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
 .route a{display:block;text-align:center;font-weight:700;text-decoration:none;padding:11px;border-radius:10px;background:var(--accent);color:var(--on-accent)}
 .route a[aria-disabled=true]{opacity:.45;pointer-events:none}
-/* matrix */
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
 .tabs button{padding:8px 2px;font-size:.9rem}
 .rt{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -86,6 +90,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
 <main>
   <h1>Magkano ang pamasahe?</h1>
   <p class="sub">San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.</p>
+  <noscript><p class="tip">This page needs JavaScript to calculate fares and show the matrix.</p></noscript>
   <nav class="nav" aria-label="Pages">
     <a href="#home" id="navHome">Home</a>
     <a href="#calc" id="navCalc">Fare checker</a>
@@ -101,7 +106,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
       <div class="row"><span>San Fernando City, La Union</span></div>
     </section>
     <a class="btn" href="#calc">Check my fare</a>
-    <a class="feat" href="#matrix"><b>Fare matrix</b><span>All 21 north, south, east and west routes, with regular and concession fares per km.</span></a>
+    <a class="feat" href="#matrix"><b>Fare matrix</b><span>All <span id="routeCount">21</span> north, south, east and west routes, with regular and concession fares per km.</span></a>
     <a class="feat" href="#report"><b>Overcharged? File a complaint</b><span>Where to report an overcharge or a fare violation.</span></a>
   </div>
 
@@ -126,7 +131,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
     </section>
   </div>
 
-  <!-- PAGE 1: CALCULATOR -->
+  <!-- FARE CHECKER -->
   <div id="vCalc" hidden>
     <section class="plate" aria-live="polite">
       <small id="what">Pay about</small>
@@ -139,12 +144,12 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
       <div class="f">
         <div class="lab"><span>How far is your trip?</span><output id="kmOut">2 km</output></div>
         <input type="range" id="km" min="0.5" max="15" step="0.5" value="2" aria-label="Distance in kilometers">
-        <p class="hint">Not sure how far? Find your stop in the <a href="#matrix">fare matrix</a> and tap its km.</p>
+        <p class="hint">Not sure how far? Find your stop in the <a href="#matrix">fare matrix</a> and tap its km, or use the route finder below.</p>
         <div class="route">
-          <input type="text" id="from" placeholder="From (where you are)" aria-label="Starting point" autocomplete="off">
+          <input type="text" id="from" placeholder="From (leave blank to use my location)" aria-label="Starting point" autocomplete="off">
           <input type="text" id="to" placeholder="To (where you’re going)" aria-label="Destination" autocomplete="off">
           <a id="mapLink" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Open route in Google Maps</a>
-          <p class="hint">Google Maps opens in a new tab. Note the distance it shows, then set it on the slider above.</p>
+          <p class="hint">Type where you’re going, then open Google Maps. Note the distance it shows and set it on the slider above. Places are searched within San Fernando, La Union.</p>
         </div>
       </div>
 
@@ -170,12 +175,13 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
         <label>First part covers (km)<input type="number" id="baseKm" min="0" step="0.5" inputmode="decimal"></label>
       </div>
       <p class="hint">Rates are saved on your device only.</p>
+      <button type="button" class="ghost" id="reset" style="margin-top:10px">Reset to city rates</button>
     </details>
 
     <p class="note">Rates are based on the San Fernando City tricycle fare matrix (₱15 for the 1st km, +₱3 per km; concession ₱12, +₱2.50 per km). Fares can be updated by the city, so confirm with the posted matrix or your local government office. Extra charges for night rides, rain or heavy loads are up to what you and the driver agree on.</p>
   </div>
 
-  <!-- PAGE 2: MATRIX -->
+  <!-- FARE MATRIX -->
   <div id="vMatrix" hidden>
     <input class="search" id="q" type="search" placeholder="Search a barangay, landmark or route" aria-label="Search the fare matrix">
     <div class="tabs" id="tabs" role="group" aria-label="Area">
@@ -193,6 +199,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
 
 <script>
 (function(){
+  var DEFAULTS={base:15,baseKm:1,extra:3,cBase:12,cExtra:2.5};
   var S={km:2,pax:1,disc:0,base:15,baseKm:1,extra:3,cBase:12,cExtra:2.5};
   var MIN={base:0,baseKm:0,extra:0,cBase:0,cExtra:0};
   var RK=["base","baseKm","extra","cBase","cExtra"];
@@ -215,7 +222,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
     try{var o={};RK.forEach(function(k){o[k]=S[k]});localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
   }
 
-  /* ---------- fare calculator ---------- */
+  /* ---------- fare checker ---------- */
   function steps(km){return Math.ceil(Math.max(0,Math.round((km-S.baseKm)*1000)/1000))}
   function calc(){
     var n=steps(S.km);
@@ -258,10 +265,24 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
     });
     el.addEventListener("blur",function(){el.value=S[k]});
   });
+  $("reset").addEventListener("click",function(){
+    RK.forEach(function(k){S[k]=DEFAULTS[k];$(k).value=S[k]});
+    save();render();buildMatrix();
+  });
+
+  /* ---------- Google Maps link ----------
+     Fixed: the old code called ("from").value (missing $), which threw an
+     error on every keystroke, so the button never switched on. */
+  var AREA=", San Fernando, La Union, Philippines";
+  function place(t){
+    return /la union|san fernando/i.test(t)?t:t+AREA;
+  }
   function updateLink(){
-    var f=("from").value.trim(),t=("to").value.trim(),a=$("mapLink");
-    if(f&&t){
-      a.href="https://www.google.com/maps/dir/?api=1&travelmode=driving&origin="+encodeURIComponent(f)+"&destination="+encodeURIComponent(t);
+    var f=$("from").value.trim(), t=$("to").value.trim(), a=$("mapLink");
+    if(t){
+      var url="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination="+encodeURIComponent(place(t));
+      if(f)url+="&origin="+encodeURIComponent(place(f));
+      a.href=url;
       a.removeAttribute("aria-disabled");a.removeAttribute("tabindex");
     }else{
       a.href="#";a.setAttribute("aria-disabled","true");a.setAttribute("tabindex","-1");
@@ -269,10 +290,11 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
   }
   $("from").addEventListener("input",updateLink);
   $("to").addEventListener("input",updateLink);
+  updateLink();
 
   /* ---------- fare matrix data (San Fernando City, La Union) ----------
      stop = [km, barangay, location]; fares come from the rates above.
-     Optional 4th item overrides concession fares as printed on the matrix. */
+     Optional last item overrides concession fares as printed on the matrix. */
   var R=[
    ["North","Poblacion to Dalumpinas Oeste",[[1,"Pagdaraoan","Barangay Hall"],[2,"Carlatan","Coca-cola Plant"],[3,"Lingsat","Molte Aries"],[4,"Lingsat","Arly Trading"],[5,"Dalumpinas Oeste","NFA"]]],
    ["North","Poblacion to Carlatan","via Diversion Road and CSI",[[1,"Poblacion","Joces Gonzales Funeral Homes"],[2,"Biday","CSI Exit"],[3,"Carlatan","Lorma Hospital Gate"]]],
@@ -296,19 +318,19 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
    ["West","Monumento to Wallace and Navy",[[1,"Catbangen","Slow Down Sign"],[2,"Poro","Flores Warehouse"],[3,"Poro","Bureau of Customs"],[4,"Poro","Thunderbird Resort (Phil. Navy)"],[4.6,"Poro","Philippine Air Force (PAF)"]]],
    ["West","Pagdalagan Crossing to Catbangen","via San Vicente",[[1,"Pagudpud","Wee Jay Videoke/Galvan Water Refilling Station"],[2,"Canaoay","Police Substation"],[3,"San Vicente/Canaoay","San Vicente Waiting Shed/Canaoay Purok 7 Sign"],[4,"Catbangen","Junction"]]]
   ].map(function(r){
-    // normalise: [area,title,(subtitle)?,stops,(concOverride)?]
     var i=2,sub="";
     if(typeof r[i]==="string"){sub=r[i];i++}
     return {area:r[0],title:r[1],sub:sub,stops:r[i],ov:r[i+1]||null};
   });
+  $("routeCount").textContent=R.length;
 
   var area="All",qtext="";
   function ord(k){
-    if(k%1)return k+"th";
+    if(k%1)return k+" km";
     var m=k%100,s=(m>=11&&m<=13)?"th":["th","st","nd","rd"][k%10]||"th";
-    return k+s;
+    return k+s+" km";
   }
-  function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}
   function buildMatrix(){
     var q=qtext.trim().toLowerCase(),out="";
     R.forEach(function(r){
@@ -318,7 +340,7 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
       var rows=r.stops.map(function(s,i){
         var n=steps(s[0]);
         var reg=S.base+n*S.extra, con=r.ov?r.ov[i]:S.cBase+n*S.cExtra;
-        return '<tr><td><button type="button" data-km="'+s[0]+'" aria-label="Use '+ord(s[0])+' km in the fare checker">'+ord(s[0])+' km</button></td>'+
+        return '<tr><td><button type="button" data-km="'+s[0]+'" aria-label="Use '+ord(s[0])+' in the fare checker">'+ord(s[0])+'</button></td>'+
           '<td>'+esc(s[2])+'<small>'+esc(s[1])+'</small></td>'+
           '<td class="n">'+peso(reg)+'</td><td class="n">'+peso(con)+'</td></tr>';
       }).join("");
@@ -333,7 +355,6 @@ td button{font:inherit;font-weight:700;color:var(--accent);background:none;borde
     S.km=Math.min(15,parseFloat(b.dataset.km));
     render();
     location.hash="calc";
-    window.scrollTo(0,0);
   });
   $("q").addEventListener("input",function(e){qtext=e.target.value;buildMatrix()});
   $("tabs").addEventListener("click",function(e){
