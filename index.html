@@ -164,7 +164,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mrow .ghost{padding:8px;font-size:.9rem}
 .legend{display:flex;align-items:center;gap:8px;margin:0}
-.swatch{flex:none;width:14px;height:14px;border-radius:4px;background:#e11d2e;opacity:.3}
+.swatch{flex:none;width:14px;height:14px;border-radius:4px;background:#646c78;opacity:.55}
 .mapwrap{flex:1;position:relative;min-height:220px}
 #map{position:absolute;inset:0;z-index:0;background:var(--bg)}
 .mapmsg{position:absolute;inset:0;z-index:1;margin:0;display:grid;place-items:center;text-align:center;padding:20px;background:var(--card);color:var(--mute)}
@@ -373,7 +373,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
       <button type="button" id="segTo" aria-pressed="false"><i class="dot to"></i><b data-t>To</b><span>Tap the map</span></button>
     </div>
     <div class="mrow"><button type="button" class="ghost" id="mapLoc" data-t>📍 Use my location</button><button type="button" class="ghost" id="mapClear" data-t>Clear pins</button></div>
-    <p class="hint legend"><i class="swatch"></i><span data-t>Red shaded area (including the sea) is outside San Fernando City.</span></p>
+    <p class="hint legend"><i class="swatch"></i><span data-t>Grey shaded area is outside San Fernando City.</span></p>
   </div>
   <div class="mapwrap"><div id="map"></div><p id="mapMsg" class="mapmsg" hidden></p></div>
   <footer class="mapf">
@@ -421,7 +421,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     "Source: City Government of San Fernando, La Union tricycle fare matrix (north, south, east and west routes). Always confirm with the posted fare matrix.":"Source: fare matrix ng tricycle ng City Government ng San Fernando, La Union (mga ruta sa hilaga, timog, silangan at kanluran). Laging kumpirmahin sa nakapaskil na fare matrix.",
     "Settings":"Mga setting","Language":"Wika","Theme":"Theme","Auto":"Auto","Light":"Light","Dark":"Dark","Animations":"Mga animation","Sliding, hover and map effects.":"Mga galaw, hover at effects sa mapa.",
     "Pin your trip":"I-pin ang biyahe mo","Fare now":"Pamasahe ngayon","From":"Mula","To":"Papunta","📍 Use my location":"📍 Gamitin ang lokasyon ko","Clear pins":"I-clear ang mga pin",
-    "Red shaded area (including the sea) is outside San Fernando City.":"Ang pulang bahagi (pati ang dagat) ay labas ng San Fernando City.","Done, show my fare":"Tapos na, ipakita ang pamasahe",
+    "Grey shaded area is outside San Fernando City.":"Ang gray na bahagi ay labas ng San Fernando City.","Done, show my fare":"Tapos na, ipakita ang pamasahe",
     "Pages":"Mga page","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
     "From (type, or pin it on the map)":"Mula (i-type, o i-pin sa mapa)","To (type, or pin it on the map)":"Papunta (i-type, o i-pin sa mapa)",
     "Fewer passengers":"Bawasan ang pasahero","More passengers":"Dagdagan ang pasahero","Fewer discounted riders":"Bawasan ang may diskwento","More discounted riders":"Dagdagan ang may diskwento",
@@ -563,7 +563,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
         var cv=document.createElement("canvas");cv.width=W;cv.height=H;
         var ctx=cv.getContext("2d"),key=c.z+"/"+c.x+"/"+c.y,nw=c.scaleBy(sz);
         var polys=CITY.polys||[[[[FB.w,FB.s],[FB.e,FB.s],[FB.e,FB.n],[FB.w,FB.n],[FB.w,FB.s]]]];
-        ctx.fillStyle="#e11d2e";
+        ctx.fillStyle="#646c78";
         ctx.beginPath();ctx.rect(0,0,W,H);
         polys.forEach(function(pg){
           pg[0].forEach(function(q,i){
@@ -582,7 +582,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
             var d=sx.getImageData(0,0,W,H).data,out=ctx.createImageData(W,H),m=new Uint8Array(W*H);
             for(var i=0,j=0;i<d.length;i+=4,j++){
               if(Math.abs(d[i]-170)+Math.abs(d[i+1]-211)+Math.abs(d[i+2]-223)<36){
-                m[j]=1;out.data[i]=225;out.data[i+1]=29;out.data[i+2]=46;out.data[i+3]=255;
+                m[j]=1;out.data[i]=100;out.data[i+1]=108;out.data[i+2]=120;out.data[i+3]=255;
               }
             }
             var wc=document.createElement("canvas");wc.width=W;wc.height=H;
@@ -607,7 +607,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     }
     if(MP.mask){MP.mask.redraw()}
     else{
-      MP.mask=new (maskClass())({pane:"sfmask",opacity:.2,keepBuffer:2});
+      MP.mask=new (maskClass())({pane:"sfmask",opacity:.4,keepBuffer:2});
       MP.mask.on("tileunload",function(e){delete WM[e.coords.z+"/"+e.coords.x+"/"+e.coords.y]});
       MP.mask.addTo(MP.map);
     }
