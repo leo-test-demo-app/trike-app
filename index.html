@@ -494,8 +494,8 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     $("brk").textContent=S.km+" km";
     $("tip").textContent=t("Hand over {0} in total. If the driver asks for more, ask to see the fare matrix before you pay.",peso(r.total));
   }
-  $("km").addEventListener("input",function(e){S.km=parseFloat(e.target.value);render()});
-  $("kmNum").addEventListener("input",function(e){var v=parseFloat(e.target.value);if(v>0){S.km=v;render()}});
+  $("km").addEventListener("input",function(e){manual();S.km=parseFloat(e.target.value);render()});
+  $("kmNum").addEventListener("input",function(e){var v=parseFloat(e.target.value);if(v>0){manual();S.km=v;render()}});
   $("kmNum").addEventListener("blur",function(e){e.target.value=S.km});
   document.querySelectorAll("[data-s]").forEach(function(b){
     b.addEventListener("click",function(){
@@ -710,11 +710,11 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     if(MP.mk[k]){MP.map&&MP.map.removeLayer(MP.mk[k]);MP.mk[k]=null}
   }
   function labelPoint(k,p){
-    var t=++MP.tok[k];
+    var tk=++MP.tok[k];
     fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=en&lat="+p.lat+"&lon="+p.lng)
       .then(function(r){return r.json()})
       .then(function(d){
-        if(MP.tok[k]!==t||!MP.pts[k])return;
+        if(MP.tok[k]!==tk||!MP.pts[k])return;
         var a=d.address||{};
         var road=d.name||a.road||a.pedestrian||"";
         var zone=a.suburb||a.neighbourhood||a.village||a.quarter||a.city_district||"";
@@ -750,35 +750,38 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     updateSeg();updateLink();updateRoute();
     return true;
   }
-  function applyKm(km,approx){
-    var r=Math.max(0.5,Math.ceil(km*2)/2);
-    S.km=r;render();
+  var lastManual=0; // when the slider, km box or matrix was last used
+  function manual(){lastManual=Date.now()}
+  function applyKm(km,approx,keep){
+    if(!keep){S.km=Math.max(0.5,Math.ceil(km*2)/2);render()}
     info(t(approx?"<strong>About {0} km</strong> in a straight line, plus a margin · fare set to {1} km.":"<strong>{0} km</strong> by road · fare set to {1} km.",km.toFixed(1),S.km));
   }
-  function updateRoute(){
-    var a=MP.pts.from,b=MP.pts.to,t=++MP.rtok;
+  // keepKm=true redraws the route without touching the fare distance
+  function updateRoute(keepKm){
+    var a=MP.pts.from,b=MP.pts.to,tok=++MP.rtok,t0=Date.now();
     if(MP.line&&MP.map){MP.map.removeLayer(MP.line);MP.line=null}
     if(!a||!b){
       info(t(!a&&!b?"Tap the map to drop your starting pin (A).":a?"Now tap your destination (B).":"Tap the map to set your starting point (A)."));
       return;
     }
     info(t("Finding the route…"));
+    function keep(){return keepKm===true||lastManual>t0} // slider used after the pins: slider wins
     fetch("https://router.project-osrm.org/route/v1/driving/"+a.lng+","+a.lat+";"+b.lng+","+b.lat+"?overview=full&geometries=geojson")
       .then(function(r){return r.json()})
       .then(function(d){
-        if(t!==MP.rtok)return;
+        if(tok!==MP.rtok)return;
         var r=d.routes&&d.routes[0];
         if(!r)throw new Error("no route");
         if(MP.map){
           MP.line=L.geoJSON(r.geometry,{style:{color:"#0f5f8c",weight:5,opacity:.85}}).addTo(MP.map);
           MP.map.fitBounds(MP.line.getBounds(),{padding:[60,60]});
         }
-        applyKm(r.distance/1000,false);
+        applyKm(r.distance/1000,false,keep());
       }).catch(function(){
-        if(t!==MP.rtok)return;
+        if(tok!==MP.rtok)return;
         var m=Math.PI/180,dl=(b.lat-a.lat)*m,dg=(b.lng-a.lng)*m;
         var h=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lat*m)*Math.cos(b.lat*m)*Math.sin(dg/2)*Math.sin(dg/2);
-        applyKm(6371*2*Math.asin(Math.sqrt(h))*1.3,true);
+        applyKm(6371*2*Math.asin(Math.sqrt(h))*1.3,true,keep());
       });
   }
   function openMap(){
@@ -787,7 +790,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     initMap();updateSeg();
     if(!CITY.exact)loadCity();
     hideSug("from");hideSug("to");
-    setTimeout(function(){if(!MP.map)return;MP.map.invalidateSize();if(MP.pts.from&&MP.pts.to)updateRoute();else{var one=MP.pts.from||MP.pts.to;if(one)MP.map.setView(one,16)}},580);
+    setTimeout(function(){if(!MP.map)return;MP.map.invalidateSize();if(MP.pts.from&&MP.pts.to)updateRoute(true);else{var one=MP.pts.from||MP.pts.to;if(one)MP.map.setView(one,16)}},580);
     $("mapClose").focus({preventScroll:true});
   }
   function closeMap(quiet){
@@ -965,7 +968,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   $("routes").addEventListener("click",function(e){
     var b=e.target.closest("button[data-km]");
     if(!b)return;
-    S.km=parseFloat(b.dataset.km);
+    manual();S.km=parseFloat(b.dataset.km);
     render();
     location.hash="calc";
   });
@@ -1018,7 +1021,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     document.querySelectorAll("[data-setlang]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.setlang===LANG))});
     document.querySelectorAll("[data-settheme]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.settheme===ST.theme))});
     $("motionSw").setAttribute("aria-checked",String(ST.motion==="on"));
-    if(text){applyLang();render();buildMatrix();updateSeg();updateLink();updateRoute();route(true)}
+    if(text){applyLang();render();buildMatrix();updateSeg();updateLink();updateRoute(true);route(true)}
   }
   function setOpen(o){
     $("setPanel").classList.toggle("open",o);
