@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
-  --bg:#eef2f5; --card:#ffffff; --ink:#10263a; --mute:#5a6b7a; --line:#d5dde4;
+  --bg:#e8f1f4; --card:#ffffff; --ink:#10263a; --mute:#5a6b7a; --line:#d5dde4;
   --plate:#ffc933; --plate-ink:#1a1400; --accent:#0f5f8c; --on-accent:#ffffff; --head:#1e9be0;
   --pa:#1f9d55; --pb:#d64545; --r:14px; --shadow:0 1px 2px rgba(16,38,58,.06),0 6px 18px rgba(16,38,58,.07);
   --ease:cubic-bezier(.22,1,.36,1); --mapw:min(52vw,760px);
@@ -219,6 +219,30 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 .switch[aria-checked=true] span{transform:translateX(20px)}
 .switch:active{transform:scale(.94)}
 
+:root{--weave-bg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%230b5c8a' stroke-width='2'%3E%3Cpath d='M24 2L46 24 24 46 2 24Z'/%3E%3Cpath d='M24 14L34 24 24 34 14 24Z'/%3E%3C/g%3E%3Cg fill='%23e8743b'%3E%3Crect x='22' y='22' width='4' height='4' transform='rotate(45 24 24)'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='48' cy='0' r='2'/%3E%3Ccircle cx='0' cy='48' r='2'/%3E%3Ccircle cx='48' cy='48' r='2'/%3E%3C/g%3E%3C/svg%3E")}
+/* San Fernando City theme: sunset sea, Poro Point-style lighthouse, yellow tricycle, woven (inabel-style) borders */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:var(--weave-bg);background-size:48px 48px;opacity:.07}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%235db8e8' stroke-width='2'%3E%3Cpath d='M24 2L46 24 24 46 2 24Z'/%3E%3Cpath d='M24 14L34 24 24 34 14 24Z'/%3E%3C/g%3E%3Cg fill='%23e8743b'%3E%3Crect x='22' y='22' width='4' height='4' transform='rotate(45 24 24)'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='48' cy='0' r='2'/%3E%3Ccircle cx='0' cy='48' r='2'/%3E%3Ccircle cx='48' cy='48' r='2'/%3E%3C/g%3E%3C/svg%3E");opacity:.08}}
+:root[data-theme="dark"] body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%235db8e8' stroke-width='2'%3E%3Cpath d='M24 2L46 24 24 46 2 24Z'/%3E%3Cpath d='M24 14L34 24 24 34 14 24Z'/%3E%3C/g%3E%3Cg fill='%23e8743b'%3E%3Crect x='22' y='22' width='4' height='4' transform='rotate(45 24 24)'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='48' cy='0' r='2'/%3E%3Ccircle cx='0' cy='48' r='2'/%3E%3Ccircle cx='48' cy='48' r='2'/%3E%3C/g%3E%3C/svg%3E");opacity:.08}
+.hero{position:relative;overflow:hidden;border-radius:20px;margin-bottom:18px;box-shadow:var(--shadow);min-height:200px;color:#fff;isolation:isolate;background:#12395f}
+.hero .scene{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(6,26,46,.82) 0%,rgba(6,26,46,.62) 40%,rgba(6,26,46,.18) 66%,rgba(6,26,46,0) 80%)}
+.hero-text{position:relative;padding:18px 18px 108px}
+.kicker{display:inline-block;font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#ffe08a;text-shadow:0 1px 6px rgba(4,20,38,.8)}
+.hero h1{color:#fff;margin:4px 0 6px;text-shadow:0 2px 3px rgba(4,20,38,.7),0 4px 18px rgba(4,20,38,.6)}
+.hero .sub{color:#fff;font-weight:600;max-width:30ch;text-shadow:0 1px 3px rgba(4,20,38,.8),0 2px 12px rgba(4,20,38,.6)}
+body:not([data-page="home"]) .hero{min-height:0}
+body:not([data-page="home"]) .hero .sub{display:none}
+body:not([data-page="home"]) .hero h1{font-size:1.5rem}
+body:not([data-page="home"]) .hero-text{padding-bottom:84px}
+.foot{margin-top:28px;text-align:center;color:var(--mute);font-size:.85rem}
+.w1{animation:drift 9s linear infinite}
+.w2{animation:drift 6s linear infinite reverse}
+.glow{animation:glow 4s ease-in-out infinite alternate;transform-origin:135px 140px}
+.trike{transform:translate(34px,141px) scale(.9);animation:bob .6s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(-60px)}}
+@keyframes glow{from{opacity:.75;transform:scale(.96)}to{opacity:1;transform:scale(1.06)}}
+@keyframes bob{from{transform:translate(34px,141px) scale(.9)}to{transform:translate(34px,140px) scale(.9)}}
 /* motion off (setting, or the device’s reduce-motion default) */
 html[data-motion="off"] *,html[data-motion="off"] *::before,html[data-motion="off"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[data-motion="off"] .btn:hover,html[data-motion="off"] .fab:hover,html[data-motion="off"] .openmap:hover{transform:none}
@@ -226,9 +250,41 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
 </head>
 <body>
 <div id="page"><main>
-  <header class="top">
-    <h1>Magkano ang pamasahe?</h1>
-    <p class="sub" data-t>San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.</p>
+  <header class="top hero">
+    <svg class="scene" viewBox="0 0 300 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f2d52"/><stop offset=".45" stop-color="#2a6a9c"/><stop offset=".7" stop-color="#f2a65a"/><stop offset="1" stop-color="#ffd58a"/></linearGradient>
+        <radialGradient id="glow"><stop offset="0" stop-color="#fff3c4" stop-opacity=".95"/><stop offset="1" stop-color="#ffd58a" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="300" height="200" fill="url(#sky)"/>
+      <circle class="glow" cx="135" cy="140" r="60" fill="url(#glow)"/>
+      <circle cx="135" cy="140" r="21" fill="#ffe7a8"/>
+      <rect y="140" width="300" height="60" fill="#0e5a86"/>
+      <path d="M113 146h44M118 153h34M124 160h22" stroke="#ffe7a8" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
+      <path d="M200 200C210 170 226 156 250 156H300V200Z" fill="#06304d"/>
+      <path d="M242 156L245 112H255L258 156Z" fill="#f4f1ea"/>
+      <path d="M244 126h11.5l-.6 6h-10.4zM243.5 140h12.5l-.6 6h-11.3z" fill="#e8743b"/>
+      <rect x="244" y="104" width="12" height="7" rx="1" fill="#ffc933"/>
+      <path d="M242 104L250 96L258 104Z" fill="#06304d"/>
+      <path d="M250 108L168 98V120Z" fill="#fff3c4" opacity=".2"/>
+      <g class="w1"><path d="M-60 166Q-30 158 0 166T60 166T120 166T180 166T240 166T300 166T360 166V200H-60Z" fill="#0a4872"/></g>
+      <g class="w2"><path d="M-60 181Q-30 174 0 181T60 181T120 181T180 181T240 181T300 181T360 181V200H-60Z" fill="#083a5c"/></g>
+      <path d="M0 200V173Q60 166 125 175V200Z" fill="#06304d"/>
+      <g class="trike">
+        <rect x="6" y="9" width="40" height="3" rx="1.5" fill="#06263d"/>
+        <path d="M8 30V18q0-7 8-7h24v19z" fill="#ffc933"/>
+        <rect x="14" y="15" width="14" height="8" rx="2" fill="#06263d"/>
+        <path d="M44 28H54M54 30L66 14H76L82 30M72 14l6-7" fill="none" stroke="#06263d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="64" cy="7" r="4" fill="#06263d"/><path d="M59 11h9l3 8h-12z" fill="#06263d"/>
+        <circle cx="20" cy="31" r="6" fill="#06263d"/><circle cx="54" cy="31" r="6" fill="#06263d"/><circle cx="82" cy="31" r="6" fill="#06263d"/>
+        <circle cx="20" cy="31" r="2" fill="#9bb0c0"/><circle cx="54" cy="31" r="2" fill="#9bb0c0"/><circle cx="82" cy="31" r="2" fill="#9bb0c0"/>
+      </g>
+    </svg>
+    <div class="hero-text">
+      <span class="kicker">City of San Fernando · La Union</span>
+      <h1>Magkano ang pamasahe?</h1>
+      <p class="sub" data-t>San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.</p>
+    </div>
   </header>
   <noscript><p class="tip">This page needs JavaScript to calculate fares and show the matrix.</p></noscript>
   <nav class="nav" aria-label="Pages" data-ti>
@@ -346,6 +402,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     <div id="routes"></div>
     <p class="note" data-t>Source: City Government of San Fernando, La Union tricycle fare matrix (north, south, east and west routes). Always confirm with the posted fare matrix.</p>
   </div>
+  <footer class="foot"><p data-t>Made for the commuters of San Fernando City, La Union.</p></footer>
 </main></div>
 
 <!-- settings -->
@@ -422,7 +479,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     "Settings":"Mga setting","Language":"Wika","Theme":"Theme","Auto":"Auto","Light":"Light","Dark":"Dark","Animations":"Mga animation","Sliding, hover and map effects.":"Mga galaw, hover at effects sa mapa.",
     "Pin your trip":"I-pin ang biyahe mo","Fare now":"Pamasahe ngayon","From":"Mula","To":"Papunta","📍 Use my location":"📍 Gamitin ang lokasyon ko","Clear pins":"I-clear ang mga pin",
     "Grey shaded area is outside San Fernando City.":"Ang gray na bahagi ay labas ng San Fernando City.","Done, show my fare":"Tapos na, ipakita ang pamasahe",
-    "Pages":"Mga page","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
+    "Pages":"Mga page","Made for the commuters of San Fernando City, La Union.":"Gawa para sa mga commuter ng San Fernando City, La Union.","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
     "From (type, or pin it on the map)":"Mula (i-type, o i-pin sa mapa)","To (type, or pin it on the map)":"Papunta (i-type, o i-pin sa mapa)",
     "Fewer passengers":"Bawasan ang pasahero","More passengers":"Dagdagan ang pasahero","Fewer discounted riders":"Bawasan ang may diskwento","More discounted riders":"Dagdagan ang may diskwento",
     "Search a barangay, landmark or route":"Maghanap ng barangay, landmark o ruta","Search the fare matrix":"Hanapin sa fare matrix","Area":"Lugar",
@@ -992,6 +1049,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
       $("nav"+id).setAttribute("aria-current",k===v?"page":"false");
     });
     document.title=t(T[v]);
+    document.body.setAttribute("data-page",v);
     if(v!=="calc")closeMap(true);
     if(!keep)window.scrollTo(0,0);
   }
