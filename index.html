@@ -164,7 +164,7 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mrow .ghost{padding:8px;font-size:.9rem}
 .legend{display:flex;align-items:center;gap:8px;margin:0}
-.swatch{flex:none;width:14px;height:14px;border-radius:4px;background:#e11d2e;opacity:.55}
+.swatch{flex:none;width:14px;height:14px;border-radius:4px;background:#e11d2e;opacity:.3}
 .mapwrap{flex:1;position:relative;min-height:220px}
 #map{position:absolute;inset:0;z-index:0;background:var(--bg)}
 .mapmsg{position:absolute;inset:0;z-index:1;margin:0;display:grid;place-items:center;text-align:center;padding:20px;background:var(--card);color:var(--mute)}
@@ -173,6 +173,16 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 .pin{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45)}
 .pin.from{background:var(--pa)}.pin.to{background:var(--pb)}
 .pin span{display:block;transform:rotate(45deg);color:#fff;font-weight:800;text-align:center;line-height:24px;font-size:13px}
+.pinw{width:30px;height:30px}
+.pinw.bad{animation:pinpop .18s ease-out both,shake .5s .18s forwards;transition:opacity .3s ease}
+.pinw.bad.out{opacity:0}
+.pin.bad{background:#b3261e}
+@keyframes pinpop{0%{transform:scale(.3) translateY(-12px);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-8px)}30%{transform:translateX(7px)}45%{transform:translateX(-6px)}60%{transform:translateX(4px)}75%{transform:translateX(-2px)}}
+#mapInfo.bad{color:#b3261e;font-weight:600}
+#mapInfo.shake{animation:shake .5s .45s}
+:root[data-theme="dark"] #mapInfo.bad{color:#ff8a80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #mapInfo.bad{color:#ff8a80}}
 .leaflet-container{font-family:inherit}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}}
 :root[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
@@ -252,7 +262,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
       </div>
       <p style="margin:0">Ang iyong ulat ay makatutulong upang maimbestigahan ang insidente at, kung mapatutunayang may paglabag, maipatupad ang kaukulang aksyon at multa alinsunod sa umiiral na ordinansa.</p>
       <p class="hint" style="margin-top:12px">Makatutulong kung handa mo ang:</p>
-      <ul class="hint"><li>Petsa, oras at ruta ng biyahe</li><li>Magkano ang hiningi sa iyo, at ang tamang pamasahe sa talaan</li><li>Plate o body number ng traysikel, kung makikita</li></ul>
+      <ul class="hint"><li>Petsa, oras at ruta ng biyahe</li><li>Magkano ang hiningi sa iyo, at ang tamang pamasahe sa fare matrix</li><li>Plate o body number ng tricycle, kung makikita</li></ul>
       <a class="btn go" href="tel:+639386399631"><span>Tawagan ang 0938-639-9631</span></a>
     </section>
     <section class="card" data-only="en" style="margin-top:0">
@@ -392,49 +402,49 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   }catch(e){}
   var LANG=ST.lang;
   var DICT={
-    "San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.":"Mga pamasahe sa traysikel sa San Fernando City, La Union. Alamin bago sumakay para tama ang bayad mo.",
-    "Home":"Simula","Fare checker":"Kalkulador","Fare matrix":"Talaan","Complaints":"Reklamo",
+    "San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.":"Mga pamasahe sa tricycle sa San Fernando City, La Union. Alamin bago sumakay para tama ang bayad mo.",
+    "Home":"Home","Fare checker":"Fare checker","Fare matrix":"Fare matrix","Complaints":"Reklamo",
     "For passengers":"Para sa mga pasahero","Know the fare before you ride.":"Alamin ang pamasahe bago sumakay.","Check my fare":"Tingnan ang pamasahe ko",
     "All north, south, east and west routes, with regular and concession fares per km.":"Lahat ng ruta sa hilaga, timog, silangan at kanluran, kasama ang regular at concession na pamasahe kada km.",
     "Overcharged? File a complaint":"Nasobrahan ang singil? Magreklamo","Where to report an overcharge or a fare violation.":"Saan magrereport ng sobrang singil o paglabag sa pamasahe.",
     "How far is your trip?":"Gaano kalayo ang biyahe mo?",
-    "Slide it, or type any distance in the box. Not sure how far? Check the Fare matrix tab, or pin your route on the map below.":"I-slide o i-type ang layo sa kahon. Hindi sigurado? Tingnan ang tab na Talaan, o i-pin ang ruta mo sa mapa sa ibaba.",
+    "Slide it, or type any distance in the box. Not sure how far? Check the Fare matrix tab, or pin your route on the map below.":"I-slide o i-type ang layo sa box. Hindi sigurado? Tingnan ang Fare matrix tab, o i-pin ang ruta mo sa mapa sa ibaba.",
     "📍 Pin it on the map":"📍 I-pin sa mapa","Or open in Google Maps":"O buksan sa Google Maps",
-    "Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Only places inside San Fernando City can be used. Suggestions use OpenStreetMap data.":"Mag-type ng lugar (hal. “city hall”) at pumili ng suhestiyon, o i-pin sa mapa. Kapag naitakda ang dalawa, kusang lalabas ang layo at pamasahe. Mga lugar lang sa loob ng San Fernando City ang pwede. Ang mga suhestiyon ay mula sa OpenStreetMap.",
+    "Start typing a place (like “city hall”) and pick a suggestion, or pin it on the map. Once both are set, the distance and fare fill in for you. Only places inside San Fernando City can be used. Suggestions use OpenStreetMap data.":"Mag-type ng lugar (hal. “city hall”) at pumili ng suggestion, o i-pin sa mapa. Kapag napili ang dalawa, lalabas na ang layo at pamasahe. Mga lugar lang sa loob ng San Fernando City ang pwede. Ang mga suggestion ay mula sa OpenStreetMap.",
     "Passengers":"Pasahero","Student, senior or PWD riders":"Estudyante, senior o PWD","They pay the concession fare on shared rides. Bring a valid ID.":"Concession fare ang bayad nila sa sharing na sakay. Magdala ng valid ID.",
-    "Fare rates (from the city’s posted matrix)":"Mga rate ng pamasahe (mula sa talaan ng lungsod)",
+    "Fare rates (from the city’s posted matrix)":"Mga rate ng pamasahe (mula sa fare matrix ng city)",
     "Regular, 1st km (₱)":"Regular, unang km (₱)","Regular, each extra km (₱)":"Regular, bawat dagdag na km (₱)","Concession, 1st km (₱)":"Concession, unang km (₱)","Concession, each extra km (₱)":"Concession, bawat dagdag na km (₱)","First part covers (km)":"Saklaw ng unang bahagi (km)",
-    "Rates are saved on your device only.":"Nakaimbak lang sa device mo ang mga rate.","Reset to city rates":"I-reset sa rate ng lungsod",
-    "Rates are based on the San Fernando City tricycle fare matrix (₱15 for the 1st km, +₱3 per km; concession ₱12, +₱2.50 per km). Fares can be updated by the city, so confirm with the posted matrix or your local government office. Extra charges for night rides, rain or heavy loads are up to what you and the driver agree on.":"Ang mga rate ay batay sa fare matrix ng traysikel ng San Fernando City (₱15 sa unang km, +₱3 kada km; concession ₱12, +₱2.50 kada km). Maaaring baguhin ng lungsod ang pamasahe, kaya kumpirmahin sa nakapaskil na matrix o sa lokal na tanggapan. Ang dagdag na singil sa gabi, ulan o mabigat na kargada ay napagkakasunduan ninyo ng tsuper.",
+    "Rates are saved on your device only.":"Nakaimbak lang sa device mo ang mga rate.","Reset to city rates":"I-reset sa rate ng city",
+    "Rates are based on the San Fernando City tricycle fare matrix (₱15 for the 1st km, +₱3 per km; concession ₱12, +₱2.50 per km). Fares can be updated by the city, so confirm with the posted matrix or your local government office. Extra charges for night rides, rain or heavy loads are up to what you and the driver agree on.":"Ang mga rate ay batay sa fare matrix ng tricycle ng San Fernando City (₱15 sa unang km, +₱3 kada km; concession ₱12, +₱2.50 kada km). Pwedeng magbago ang pamasahe, kaya kumpirmahin sa nakapaskil na fare matrix o sa city hall. Ang dagdag na singil sa gabi, ulan o mabigat na dala ay napag-uusapan ninyo ng driver.",
     "All":"Lahat","North":"Hilaga","South":"Timog","East":"Silangan","West":"Kanluran",
-    "Tap a km marker to check that fare in the fare checker.":"Pindutin ang km para makita ang pamasahe sa kalkulador.",
-    "Source: City Government of San Fernando, La Union tricycle fare matrix (north, south, east and west routes). Always confirm with the posted fare matrix.":"Pinagkunan: fare matrix ng traysikel ng Pamahalaang Lungsod ng San Fernando, La Union (mga ruta sa hilaga, timog, silangan at kanluran). Laging kumpirmahin sa nakapaskil na fare matrix.",
-    "Settings":"Mga setting","Language":"Wika","Theme":"Tema","Auto":"Awtomatiko","Light":"Maliwanag","Dark":"Madilim","Animations":"Mga animation","Sliding, hover and map effects.":"Mga galaw, hover at epekto sa mapa.",
-    "Pin your trip":"I-pin ang biyahe mo","Fare now":"Pamasahe ngayon","From":"Mula","To":"Hanggang","📍 Use my location":"📍 Gamitin ang lokasyon ko","Clear pins":"Burahin ang mga pin",
+    "Tap a km marker to check that fare in the fare checker.":"Pindutin ang km para makita ang pamasahe sa fare checker.",
+    "Source: City Government of San Fernando, La Union tricycle fare matrix (north, south, east and west routes). Always confirm with the posted fare matrix.":"Source: fare matrix ng tricycle ng City Government ng San Fernando, La Union (mga ruta sa hilaga, timog, silangan at kanluran). Laging kumpirmahin sa nakapaskil na fare matrix.",
+    "Settings":"Mga setting","Language":"Wika","Theme":"Theme","Auto":"Auto","Light":"Light","Dark":"Dark","Animations":"Mga animation","Sliding, hover and map effects.":"Mga galaw, hover at effects sa mapa.",
+    "Pin your trip":"I-pin ang biyahe mo","Fare now":"Pamasahe ngayon","From":"Mula","To":"Papunta","📍 Use my location":"📍 Gamitin ang lokasyon ko","Clear pins":"I-clear ang mga pin",
     "Red shaded area (including the sea) is outside San Fernando City.":"Ang pulang bahagi (pati ang dagat) ay labas ng San Fernando City.","Done, show my fare":"Tapos na, ipakita ang pamasahe",
-    "Pages":"Mga pahina","Distance slider in kilometers":"Slider ng layo sa kilometro","Starting point":"Pinagmulan","Destination":"Destinasyon",
-    "From (type, or pin it on the map)":"Mula (i-type, o i-pin sa mapa)","To (type, or pin it on the map)":"Hanggang (i-type, o i-pin sa mapa)",
+    "Pages":"Mga page","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
+    "From (type, or pin it on the map)":"Mula (i-type, o i-pin sa mapa)","To (type, or pin it on the map)":"Papunta (i-type, o i-pin sa mapa)",
     "Fewer passengers":"Bawasan ang pasahero","More passengers":"Dagdagan ang pasahero","Fewer discounted riders":"Bawasan ang may diskwento","More discounted riders":"Dagdagan ang may diskwento",
-    "Search a barangay, landmark or route":"Maghanap ng barangay, landmark o ruta","Search the fare matrix":"Hanapin sa talaan ng pamasahe","Area":"Lugar",
+    "Search a barangay, landmark or route":"Maghanap ng barangay, landmark o ruta","Search the fare matrix":"Hanapin sa fare matrix","Area":"Lugar",
     "Close settings":"Isara ang settings","Close map":"Isara ang mapa","Pin your trip on the map":"I-pin ang biyahe mo sa mapa","Which pin to place":"Aling pin ang ilalagay",
     "Fair fare for {0} passenger":"Tamang pamasahe para sa {0} pasahero","Fair fare for {0} passengers":"Tamang pamasahe para sa {0} pasahero",
-    "Hand over {0} in total. If the driver asks for more, ask to see the fare matrix before you pay.":"Magbayad ng {0} sa kabuuan. Kung humingi ng mas mataas ang tsuper, hingin muna ang fare matrix bago magbayad.",
+    "Hand over {0} in total. If the driver asks for more, ask to see the fare matrix before you pay.":"Magbayad ng {0} sa kabuuan. Kung humingi ng mas mataas ang driver, hingin muna ang fare matrix bago magbayad.",
     "The map couldn’t load. Check your internet connection, then close and reopen this panel.":"Hindi nag-load ang mapa. Tingnan ang internet, saka isara at buksan ulit ang panel.",
-    "Tap the map to drop your starting pin (A).":"I-tap ang mapa para ilagay ang pin ng pinagmulan (A).","Now tap your destination (B).":"Ngayon, i-tap ang destinasyon (B).","Tap the map to set your starting point (A).":"I-tap ang mapa para itakda ang pinagmulan (A).",
+    "Tap the map to drop your starting pin (A).":"I-tap ang mapa para ilagay ang starting pin (A).","Now tap your destination (B).":"Ngayon, i-tap ang destinasyon (B).","Tap the map to set your starting point (A).":"I-tap ang mapa para ilagay ang starting pin (A).",
     "Finding the route…":"Hinahanap ang ruta…","Finding you…":"Hinahanap ka…",
     "Your browser can’t share your location. Tap the map instead.":"Hindi maibahagi ng browser mo ang lokasyon. I-tap na lang ang mapa.","Couldn’t get your location. Tap the map instead.":"Hindi makuha ang lokasyon mo. I-tap na lang ang mapa.",
-    "<strong>About {0} km</strong> in a straight line, plus a margin · fare set to {1} km.":"<strong>Humigit-kumulang {0} km</strong> nang tuwid, may dagdag na margin · nakatakda ang pamasahe sa {1} km.",
-    "<strong>{0} km</strong> by road · fare set to {1} km.":"<strong>{0} km</strong> sa daan · nakatakda ang pamasahe sa {1} km.",
-    "That spot is outside <strong>San Fernando City</strong> (or on the water). Please choose a place on land inside the city.":"Nasa labas ng <strong>San Fernando City</strong> ang lugar na iyon (o nasa tubig). Pumili ng lugar sa lupa sa loob ng lungsod.",
-    "Choose {0} from the suggestions or pin it on the map. Only places inside San Fernando City can be used.":"Piliin ang {0} mula sa mga suhestiyon o i-pin sa mapa. Mga lugar lang sa loob ng San Fernando City ang pwede.",
-    "both places":"parehong lugar","the starting point":"pinagmulan","the destination":"destinasyon","Tap the map":"I-tap ang mapa",
+    "<strong>About {0} km</strong> in a straight line, plus a margin · fare set to {1} km.":"<strong>Mga {0} km</strong> (straight line, may dagdag na margin) · pamasahe para sa {1} km.",
+    "<strong>{0} km</strong> by road · fare set to {1} km.":"<strong>{0} km</strong> sa daan · pamasahe para sa {1} km.",
+    "That spot is outside <strong>San Fernando City</strong> (or on the water). Please choose a place on land inside the city.":"Nasa labas ng <strong>San Fernando City</strong> ang spot na iyon (o nasa tubig). Pumili ng lugar sa lupa sa loob ng city.",
+    "Choose {0} from the suggestions or pin it on the map. Only places inside San Fernando City can be used.":"Pumili ng {0} sa suggestions o i-pin sa mapa. Mga lugar lang sa loob ng San Fernando City ang pwede.",
+    "both places":"parehong lugar","the starting point":"starting point","the destination":"destinasyon","Tap the map":"I-tap ang mapa",
     "Searching…":"Naghahanap…","No matching places inside San Fernando City. Try another name or pin it on the map.":"Walang tugmang lugar sa loob ng San Fernando City. Subukan ang ibang pangalan o i-pin sa mapa.",
-    "Suggestions unavailable right now. You can still type a place or pin it on the map.":"Walang suhestiyon ngayon. Pwede mo pa ring i-type ang lugar o i-pin sa mapa.",
-    "Stop":"Tigil","Location":"Lokasyon","Regular":"Regular","Concession":"Concession",
+    "Suggestions unavailable right now. You can still type a place or pin it on the map.":"Walang suggestions ngayon. Pwede mo pa ring i-type ang lugar o i-pin sa mapa.",
+    "Stop":"Stop","Location":"Lokasyon","Regular":"Regular","Concession":"Concession",
     "North route":"Ruta sa Hilaga","South route":"Ruta sa Timog","East route":"Ruta sa Silangan","West route":"Ruta sa Kanluran",
-    "No stops match that search.":"Walang tigil na tumutugma sa hinanap.","Use {0} in the fare checker":"Gamitin ang {0} sa kalkulador",
-    "Magkano ang Pamasahe? San Fernando tricycle fares":"Magkano ang Pamasahe? Traysikel sa San Fernando",
-    "Fare checker · San Fernando tricycle":"Kalkulador · Traysikel sa San Fernando","Fare matrix · San Fernando tricycle":"Talaan ng pamasahe · Traysikel sa San Fernando","File a complaint · San Fernando tricycle":"Magreklamo · Traysikel sa San Fernando"
+    "No stops match that search.":"Walang stop na tumutugma sa hinanap.","Use {0} in the fare checker":"Gamitin ang {0} sa fare checker",
+    "Magkano ang Pamasahe? San Fernando tricycle fares":"Magkano ang Pamasahe? Tricycle sa San Fernando",
+    "Fare checker · San Fernando tricycle":"Fare checker · Tricycle sa San Fernando","Fare matrix · San Fernando tricycle":"Fare matrix · Tricycle sa San Fernando","File a complaint · San Fernando tricycle":"Magreklamo · Tricycle sa San Fernando"
   };
   function t(s){
     var r=(LANG==="fil"&&DICT[s])||s;
@@ -597,7 +607,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     }
     if(MP.mask){MP.mask.redraw()}
     else{
-      MP.mask=new (maskClass())({pane:"sfmask",opacity:.42,keepBuffer:2});
+      MP.mask=new (maskClass())({pane:"sfmask",opacity:.2,keepBuffer:2});
       MP.mask.on("tileunload",function(e){delete WM[e.coords.z+"/"+e.coords.x+"/"+e.coords.y]});
       MP.mask.addTo(MP.map);
     }
@@ -643,7 +653,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   function place(t){return /la union|san fernando/i.test(t)?t:t+AREA}
   function ll(p){return p.lat.toFixed(6)+","+p.lng.toFixed(6)}
   function fmt(p){return p.lat.toFixed(5)+", "+p.lng.toFixed(5)}
-  function info(h){$("mapInfo").innerHTML=h}
+  function info(h){var el=$("mapInfo");el.classList.remove("bad","shake");el.innerHTML=h}
 
   function updateLink(){
     var a=$("mapLink"),bad=[];
@@ -673,7 +683,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   }
   function selectActive(k){MP.active=k;updateSeg()}
   function pinIcon(k){
-    return L.divIcon({className:"",html:'<div class="pin '+k+'"><span>'+(k==="from"?"A":"B")+'</span></div>',iconSize:[30,30],iconAnchor:[15,36]});
+    return L.divIcon({className:"",html:'<div class="pinw"><div class="pin '+k+'"><span>'+(k==="from"?"A":"B")+'</span></div></div>',iconSize:[30,30],iconAnchor:[15,36]});
   }
   function initMap(){
     if(MP.map)return;
@@ -712,9 +722,24 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
         if(parts.length){$(k).value=parts.join(", ");updateSeg()}
       }).catch(function(){});
   }
+  function rejectPoint(p){
+    info(t("That spot is outside <strong>San Fernando City</strong> (or on the water). Please choose a place on land inside the city."));
+    var el=$("mapInfo");
+    el.classList.add("bad");el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
+    if(!MP.map)return;
+    clearTimeout(MP.tmpT);
+    if(MP.tmp){MP.map.removeLayer(MP.tmp);MP.tmp=null}
+    var m=L.marker(p,{icon:L.divIcon({className:"",html:'<div class="pinw bad"><div class="pin bad"><span>✕</span></div></div>',iconSize:[30,30],iconAnchor:[15,36]}),interactive:false,keyboard:false,zIndexOffset:1000}).addTo(MP.map);
+    MP.tmp=m;
+    MP.tmpT=setTimeout(function(){
+      var e=m.getElement&&m.getElement();
+      if(e&&e.firstChild)e.firstChild.classList.add("out");
+      setTimeout(function(){if(MP.map&&MP.tmp===m){MP.map.removeLayer(m);MP.tmp=null}},320);
+    },1200);
+  }
   function setPoint(k,p,advance,keepName){
     if(!inCity(p)){
-      info(t("That spot is outside <strong>San Fernando City</strong> (or on the water). Please choose a place on land inside the city."));
+      rejectPoint(p);
       return false;
     }
     MP.pts[k]=p;
