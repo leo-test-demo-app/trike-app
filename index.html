@@ -312,6 +312,7 @@ html[data-layout="desktop"] .foot{margin-top:40px}
   html[data-layout="desktop"] #vCalc{gap:0 26px}
   html[data-layout="desktop"] #vCalc>.calcform{padding:22px}
 }
+.updated{position:fixed;left:calc(14px + env(safe-area-inset-left,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:30;max-width:calc(100vw - 100px);font-size:.72rem;line-height:1.2;color:var(--mute);opacity:.85;padding:4px 8px;border-radius:8px;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);pointer-events:none}
 /* motion off (setting, or the device’s reduce-motion default) */
 html[data-motion="off"] *,html[data-motion="off"] *::before,html[data-motion="off"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[data-motion="off"] .btn:hover,html[data-motion="off"] .fab:hover,html[data-motion="off"] .openmap:hover{transform:none}
@@ -445,6 +446,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   <footer class="foot"><p data-t>Made for the commuters of San Fernando City, La Union.</p></footer>
 </main></div>
 
+<div class="updated" id="updated" hidden></div>
 <!-- settings -->
 <div class="dock" id="dock">
   <div class="setpanel" id="setPanel" role="dialog" aria-labelledby="setTitle" aria-hidden="true">
@@ -500,6 +502,8 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     }
   }catch(e){}
   var LANG=ST.lang;
+  // When the city updates the fare matrix, change this date (YYYY-MM-DD). Leave it "" to hide the label.
+  var FARES_UPDATED="2026-11-19";
   // first visit: pick the layout that suits the device (phones = mobile; tablets, laptops and desktops = desktop/tablet); a saved choice wins
   var LAYOUT=ST.layout||(Math.min(screen.width||9999,screen.height||9999,window.innerWidth||9999)<600?"mobile":"desktop");
   var DICT={
@@ -523,7 +527,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     "Settings":"Mga setting","Language":"Wika","Theme":"Theme","Auto":"Auto","Light":"Light","Dark":"Dark","Animations":"Mga animation","Sliding, hover and map effects.":"Mga galaw, hover at effects sa mapa.",
     "Pin your trip":"I-pin ang biyahe mo","Fare now":"Pamasahe ngayon","From":"Mula","To":"Papunta","📍 Use my location":"📍 Gamitin ang lokasyon ko","Clear pins":"I-clear ang mga pin",
     "Grey shaded area is outside San Fernando City.":"Ang gray na bahagi ay labas ng San Fernando City.","Done, show my fare":"Tapos na, ipakita ang pamasahe",
-    "Pages":"Mga page","Made for the commuters of San Fernando City, La Union.":"Gawa para sa mga commuter ng San Fernando City, La Union.","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
+    "Pages":"Mga page","Fares last updated: {0}":"Huling update ng pamasahe: {0}","Made for the commuters of San Fernando City, La Union.":"Gawa para sa mga commuter ng San Fernando City, La Union.","Distance slider in kilometers":"Slider ng layo (km)","Starting point":"Starting point","Destination":"Destinasyon",
     "From (type, or pin it on the map)":"Mula (i-type, o i-pin sa mapa)","To (type, or pin it on the map)":"Papunta (i-type, o i-pin sa mapa)",
     "Fewer passengers":"Bawasan ang pasahero","More passengers":"Dagdagan ang pasahero","Fewer discounted riders":"Bawasan ang may diskwento","More discounted riders":"Dagdagan ang may diskwento",
     "Search a barangay, landmark or route":"Maghanap ng barangay, landmark o ruta","Search the fare matrix":"Hanapin sa fare matrix","Area":"Lugar",
@@ -1101,6 +1105,14 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
 
   /* ---------- language + settings ---------- */
   function saveST(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
+  function renderUpdated(){
+    var el=$("updated"),d=FARES_UPDATED?new Date(FARES_UPDATED+"T00:00:00"):null;
+    if(!d||isNaN(d)){el.hidden=true;return}
+    var txt;
+    try{txt=d.toLocaleDateString(LANG==="fil"?"fil-PH":"en-PH",{year:"numeric",month:"short",day:"numeric"})}catch(e){txt=FARES_UPDATED}
+    el.textContent=t("Fares last updated: {0}",txt);
+    el.hidden=false;
+  }
   function applyLang(){
     document.documentElement.lang=LANG;
     document.querySelectorAll("[data-t]").forEach(function(el){
@@ -1125,7 +1137,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     document.querySelectorAll("[data-settheme]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.settheme===ST.theme))});
     document.querySelectorAll("[data-setlayout]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.setlayout===LAYOUT))});
     $("motionSw").setAttribute("aria-checked",String(ST.motion==="on"));
-    if(text){applyLang();render();buildMatrix();updateSeg();updateLink();updateRoute(true);route(true)}
+    if(text){applyLang();renderUpdated();render();buildMatrix();updateSeg();updateLink();updateRoute(true);route(true)}
   }
   function setOpen(o){
     $("setPanel").classList.toggle("open",o);
