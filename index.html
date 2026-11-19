@@ -224,25 +224,78 @@ body.map-open .mapp{transform:none;visibility:visible;transition-delay:0s}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:var(--weave-bg);background-size:48px 48px;opacity:.07}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%235db8e8' stroke-width='2'%3E%3Cpath d='M24 2L46 24 24 46 2 24Z'/%3E%3Cpath d='M24 14L34 24 24 34 14 24Z'/%3E%3C/g%3E%3Cg fill='%23e8743b'%3E%3Crect x='22' y='22' width='4' height='4' transform='rotate(45 24 24)'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='48' cy='0' r='2'/%3E%3Ccircle cx='0' cy='48' r='2'/%3E%3Ccircle cx='48' cy='48' r='2'/%3E%3C/g%3E%3C/svg%3E");opacity:.08}}
 :root[data-theme="dark"] body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%235db8e8' stroke-width='2'%3E%3Cpath d='M24 2L46 24 24 46 2 24Z'/%3E%3Cpath d='M24 14L34 24 24 34 14 24Z'/%3E%3C/g%3E%3Cg fill='%23e8743b'%3E%3Crect x='22' y='22' width='4' height='4' transform='rotate(45 24 24)'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='48' cy='0' r='2'/%3E%3Ccircle cx='0' cy='48' r='2'/%3E%3Ccircle cx='48' cy='48' r='2'/%3E%3C/g%3E%3C/svg%3E");opacity:.08}
-.hero{position:relative;overflow:hidden;border-radius:20px;margin-bottom:18px;box-shadow:var(--shadow);min-height:200px;color:#fff;isolation:isolate;background:#12395f}
-.hero .scene{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(6,26,46,.82) 0%,rgba(6,26,46,.62) 40%,rgba(6,26,46,.18) 66%,rgba(6,26,46,0) 80%)}
-.hero-text{position:relative;padding:18px 18px 108px}
-.kicker{display:inline-block;font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#ffe08a;text-shadow:0 1px 6px rgba(4,20,38,.8)}
-.hero h1{color:#fff;margin:4px 0 6px;text-shadow:0 2px 3px rgba(4,20,38,.7),0 4px 18px rgba(4,20,38,.6)}
-.hero .sub{color:#fff;font-weight:600;max-width:30ch;text-shadow:0 1px 3px rgba(4,20,38,.8),0 2px 12px rgba(4,20,38,.6)}
-body:not([data-page="home"]) .hero{min-height:0}
-body:not([data-page="home"]) .hero .sub{display:none}
-body:not([data-page="home"]) .hero h1{font-size:1.5rem}
-body:not([data-page="home"]) .hero-text{padding-bottom:84px}
 .foot{margin-top:28px;text-align:center;color:var(--mute);font-size:.85rem}
-.w1{animation:drift 9s linear infinite}
-.w2{animation:drift 6s linear infinite reverse}
-.glow{animation:glow 4s ease-in-out infinite alternate;transform-origin:135px 140px}
-.trike{transform:translate(34px,141px) scale(.9);animation:bob .6s ease-in-out infinite alternate}
-@keyframes drift{to{transform:translateX(-60px)}}
-@keyframes glow{from{opacity:.75;transform:scale(.96)}to{opacity:1;transform:scale(1.06)}}
-@keyframes bob{from{transform:translate(34px,141px) scale(.9)}to{transform:translate(34px,140px) scale(.9)}}
+
+/* ===== title block (no banner) ===== */
+.kicker{display:inline-block;font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.top .sub{max-width:44ch}
+body:not([data-page="home"]) .top .sub{display:none}
+body:not([data-page="home"]) h1{font-size:1.5rem}
+#page{container-type:inline-size}
+
+/* ===== mobile layout polish ===== */
+.nav a{min-height:62px}
+.tabs button,.segc button{min-height:40px}
+td button{min-height:36px}
+@media (hover:none){
+  .nav a:not([aria-current=page]):hover{transform:none;border-color:var(--line);color:var(--ink);box-shadow:0 3px 0 var(--line)}
+  .nav a:hover svg{transform:none}
+  .feat:hover{transform:none;border-color:var(--line);box-shadow:0 2px 0 var(--line)}
+  .feat:hover .arr{transform:none;background:var(--bg);color:var(--accent)}
+  .btn:hover,.openmap:hover{transform:none;box-shadow:none;filter:none}
+  .fab:hover{transform:none;box-shadow:0 6px 18px rgba(15,95,140,.4)}
+  .fab:hover svg{transform:none}
+}
+@media(max-width:380px){
+  main{padding:16px 12px 110px}
+  h1{font-size:1.6rem}
+  .amt{font-size:3.6rem}
+  .rates{grid-template-columns:1fr}
+  .nav{gap:6px}
+}
+
+/* ===== desktop layout ===== */
+html[data-layout="desktop"] main{max-width:1160px;padding:16px 32px 120px}
+html[data-layout="desktop"] h1{font-size:1.7rem;margin:2px 0 0}
+html[data-layout="desktop"] .top{margin:0}
+@container (min-width:880px){
+  html[data-layout="desktop"] .bar{position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 -32px 26px;padding:14px 32px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  html[data-layout="desktop"] .top .sub{display:none}
+  html[data-layout="desktop"] body h1,html[data-layout="desktop"] h1{font-size:1.7rem}
+  html[data-layout="desktop"] .nav{grid-template-columns:repeat(4,auto);gap:10px;margin:0}
+  html[data-layout="desktop"] .nav a{flex-direction:row;gap:8px;padding:10px 18px;font-size:.92rem;min-height:0}
+  html[data-layout="desktop"] .nav a[aria-current=page]::after{display:none}
+
+  /* home */
+  html[data-layout="desktop"] #vHome{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+  html[data-layout="desktop"] #vHome .plate{grid-column:1/-1;padding:40px 44px}
+  html[data-layout="desktop"] #vHome .amt.s{font-size:3.6rem;max-width:14ch}
+  html[data-layout="desktop"] #vHome .plate small{font-size:1rem}
+  html[data-layout="desktop"] #vHome .btn,html[data-layout="desktop"] #vHome .feat{margin-top:0}
+  html[data-layout="desktop"] #vHome .btn{font-size:1.15rem;min-height:100%}
+  html[data-layout="desktop"] #vHome .feat{padding:22px}
+
+  /* fare checker */
+  html[data-layout="desktop"] #vCalc{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-rows:auto auto 1fr;gap:0 26px;align-items:start}
+  html[data-layout="desktop"] #vCalc>.calcform{grid-column:1;grid-row:1/span 3;margin-top:0;padding:22px}
+  html[data-layout="desktop"] #vCalc>.plate{grid-column:2;grid-row:1}
+  html[data-layout="desktop"] #vCalc>.tip{grid-column:2;grid-row:2}
+  html[data-layout="desktop"] #vCalc>details{grid-column:2;grid-row:3;margin-top:16px}
+  html[data-layout="desktop"] #vCalc>.note{grid-column:1/-1}
+  html[data-layout="desktop"] #vCalc .amt{font-size:5rem}
+
+  /* fare matrix */
+  html[data-layout="desktop"] #vMatrix{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 20px;align-items:center}
+  html[data-layout="desktop"] #vMatrix .search{grid-column:1;max-width:560px}
+  html[data-layout="desktop"] #vMatrix .tabs{grid-column:2;margin:0;width:440px}
+  html[data-layout="desktop"] #vMatrix>.hint{grid-column:1/-1;margin-top:12px}
+  html[data-layout="desktop"] #vMatrix>.note{grid-column:1/-1}
+  html[data-layout="desktop"] #routes{grid-column:1/-1;columns:2;column-gap:18px;margin-top:6px}
+  html[data-layout="desktop"] #routes .rt{margin-top:0;margin-bottom:18px;break-inside:avoid}
+  html[data-layout="desktop"] #routes .empty{column-span:all}
+}
+html[data-layout="desktop"] #vReport{max-width:760px;margin:0 auto}
+html[data-layout="desktop"] .foot{margin-top:40px}
 /* motion off (setting, or the device’s reduce-motion default) */
 html[data-motion="off"] *,html[data-motion="off"] *::before,html[data-motion="off"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[data-motion="off"] .btn:hover,html[data-motion="off"] .fab:hover,html[data-motion="off"] .openmap:hover{transform:none}
@@ -250,49 +303,20 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
 </head>
 <body>
 <div id="page"><main>
-  <header class="top hero">
-    <svg class="scene" viewBox="0 0 300 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f2d52"/><stop offset=".45" stop-color="#2a6a9c"/><stop offset=".7" stop-color="#f2a65a"/><stop offset="1" stop-color="#ffd58a"/></linearGradient>
-        <radialGradient id="glow"><stop offset="0" stop-color="#fff3c4" stop-opacity=".95"/><stop offset="1" stop-color="#ffd58a" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect width="300" height="200" fill="url(#sky)"/>
-      <circle class="glow" cx="135" cy="140" r="60" fill="url(#glow)"/>
-      <circle cx="135" cy="140" r="21" fill="#ffe7a8"/>
-      <rect y="140" width="300" height="60" fill="#0e5a86"/>
-      <path d="M113 146h44M118 153h34M124 160h22" stroke="#ffe7a8" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
-      <path d="M200 200C210 170 226 156 250 156H300V200Z" fill="#06304d"/>
-      <path d="M242 156L245 112H255L258 156Z" fill="#f4f1ea"/>
-      <path d="M244 126h11.5l-.6 6h-10.4zM243.5 140h12.5l-.6 6h-11.3z" fill="#e8743b"/>
-      <rect x="244" y="104" width="12" height="7" rx="1" fill="#ffc933"/>
-      <path d="M242 104L250 96L258 104Z" fill="#06304d"/>
-      <path d="M250 108L168 98V120Z" fill="#fff3c4" opacity=".2"/>
-      <g class="w1"><path d="M-60 166Q-30 158 0 166T60 166T120 166T180 166T240 166T300 166T360 166V200H-60Z" fill="#0a4872"/></g>
-      <g class="w2"><path d="M-60 181Q-30 174 0 181T60 181T120 181T180 181T240 181T300 181T360 181V200H-60Z" fill="#083a5c"/></g>
-      <path d="M0 200V173Q60 166 125 175V200Z" fill="#06304d"/>
-      <g class="trike">
-        <rect x="6" y="9" width="40" height="3" rx="1.5" fill="#06263d"/>
-        <path d="M8 30V18q0-7 8-7h24v19z" fill="#ffc933"/>
-        <rect x="14" y="15" width="14" height="8" rx="2" fill="#06263d"/>
-        <path d="M44 28H54M54 30L66 14H76L82 30M72 14l6-7" fill="none" stroke="#06263d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="64" cy="7" r="4" fill="#06263d"/><path d="M59 11h9l3 8h-12z" fill="#06263d"/>
-        <circle cx="20" cy="31" r="6" fill="#06263d"/><circle cx="54" cy="31" r="6" fill="#06263d"/><circle cx="82" cy="31" r="6" fill="#06263d"/>
-        <circle cx="20" cy="31" r="2" fill="#9bb0c0"/><circle cx="54" cy="31" r="2" fill="#9bb0c0"/><circle cx="82" cy="31" r="2" fill="#9bb0c0"/>
-      </g>
-    </svg>
-    <div class="hero-text">
-      <span class="kicker">City of San Fernando · La Union</span>
-      <h1>Magkano ang pamasahe?</h1>
-      <p class="sub" data-t>San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.</p>
-    </div>
+  <div class="bar">
+  <header class="top">
+    <span class="kicker">🛺 City of San Fernando · La Union</span>
+    <h1>Magkano ang pamasahe?</h1>
+    <p class="sub" data-t>San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.</p>
   </header>
-  <noscript><p class="tip">This page needs JavaScript to calculate fares and show the matrix.</p></noscript>
   <nav class="nav" aria-label="Pages" data-ti>
     <a href="#home" id="navHome"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span data-t>Home</span></a>
     <a href="#calc" id="navCalc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg><span data-t>Fare checker</span></a>
     <a href="#matrix" id="navMatrix"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span data-t>Fare matrix</span></a>
     <a href="#report" id="navReport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span data-t>Complaints</span></a>
   </nav>
+  </div>
+  <noscript><p class="tip">This page needs JavaScript to calculate fares and show the matrix.</p></noscript>
 
   <!-- HOME -->
   <div id="vHome">
@@ -345,7 +369,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     </section>
     <p class="tip" id="tip"></p>
 
-    <section class="card">
+    <section class="card calcform">
       <div class="f">
         <div class="lab"><label for="kmNum" data-t>How far is your trip?</label><span class="kmbox"><input type="number" id="kmNum" min="0.1" step="0.1" inputmode="decimal" value="2"> km</span></div>
         <input type="range" id="km" min="0.5" max="30" step="0.5" value="2" aria-label="Distance slider in kilometers" data-ti>
@@ -411,6 +435,8 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     <div class="sethead"><b id="setTitle" data-t>Settings</b><button type="button" class="iconbtn" id="setClose" aria-label="Close settings" data-ti>✕</button></div>
     <div class="setrow"><span class="setlab" data-t>Language</span>
       <div class="segc" role="group" aria-label="Language" data-ti><button type="button" data-setlang="fil" aria-pressed="false">Filipino</button><button type="button" data-setlang="en" aria-pressed="true">English</button></div></div>
+    <div class="setrow"><span class="setlab" data-t>Layout</span>
+      <div class="segc" role="group" aria-label="Layout" data-ti><button type="button" data-setlayout="mobile" aria-pressed="false" data-t>Mobile</button><button type="button" data-setlayout="desktop" aria-pressed="false" data-t>Desktop</button></div></div>
     <div class="setrow"><span class="setlab" data-t>Theme</span>
       <div class="segc" role="group" aria-label="Theme" data-ti><button type="button" data-settheme="auto" aria-pressed="true" data-t>Auto</button><button type="button" data-settheme="light" aria-pressed="false" data-t>Light</button><button type="button" data-settheme="dark" aria-pressed="false" data-t>Dark</button></div></div>
     <div class="setrow sw"><div><span class="setlab" data-t>Animations</span><small data-t>Sliding, hover and map effects.</small></div>
@@ -448,16 +474,18 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   var MAXPAX=6, KEY="tricycle-fare-v2";
   var $=function(i){return document.getElementById(i)};
 
-  var SKEY="sf-settings-v1", ST={lang:"en",motion:"on",theme:"auto"};
+  var SKEY="sf-settings-v1", ST={lang:"en",motion:"on",theme:"auto",layout:null};
   try{
     var _raw=localStorage.getItem(SKEY),_s=JSON.parse(_raw||"null");
-    if(_s){["lang","motion","theme"].forEach(function(k){if(_s[k])ST[k]=_s[k]})}
+    if(_s){["lang","motion","theme","layout"].forEach(function(k){if(_s[k])ST[k]=_s[k]})}
     else{
       if(/^(fil|tl)/i.test(navigator.language||""))ST.lang="fil";
       if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)ST.motion="off";
     }
   }catch(e){}
   var LANG=ST.lang;
+  // first visit: pick the layout that suits the device (touch or small screen = mobile, otherwise desktop); a saved choice wins
+  var LAYOUT=ST.layout||(((window.matchMedia&&matchMedia("(pointer: coarse)").matches)||window.innerWidth<700)?"mobile":"desktop");
   var DICT={
     "San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.":"Mga pamasahe sa tricycle sa San Fernando City, La Union. Alamin bago sumakay para tama ang bayad mo.",
     "Home":"Home","Fare checker":"Fare checker","Fare matrix":"Fare matrix","Complaints":"Reklamo",
@@ -1075,9 +1103,11 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   function applySettings(text){
     var h=document.documentElement;
     h.setAttribute("data-motion",ST.motion);
+    h.setAttribute("data-layout",LAYOUT);
     if(ST.theme==="auto")h.removeAttribute("data-theme");else h.setAttribute("data-theme",ST.theme);
     document.querySelectorAll("[data-setlang]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.setlang===LANG))});
     document.querySelectorAll("[data-settheme]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.settheme===ST.theme))});
+    document.querySelectorAll("[data-setlayout]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.setlayout===LAYOUT))});
     $("motionSw").setAttribute("aria-checked",String(ST.motion==="on"));
     if(text){applyLang();render();buildMatrix();updateSeg();updateLink();updateRoute(true);route(true)}
   }
@@ -1095,6 +1125,10 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
   })});
   document.querySelectorAll("[data-settheme]").forEach(function(b){b.addEventListener("click",function(){
     ST.theme=b.dataset.settheme;saveST();applySettings(false);
+  })});
+  document.querySelectorAll("[data-setlayout]").forEach(function(b){b.addEventListener("click",function(){
+    LAYOUT=ST.layout=b.dataset.setlayout;saveST();applySettings(false);
+    if(MP.map)setTimeout(function(){MP.map.invalidateSize()},50);
   })});
   $("motionSw").addEventListener("click",function(){
     ST.motion=ST.motion==="on"?"off":"on";saveST();applySettings(false);
