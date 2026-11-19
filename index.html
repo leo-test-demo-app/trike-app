@@ -129,7 +129,7 @@ summary{cursor:pointer;font-weight:600;padding:8px 0}
 
 /* matrix */
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:12px 0}
-.tabs button{padding:8px 2px;font-size:.88rem;font-weight:600;border:1.5px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
+.tabs button{min-width:0;padding:8px 2px;font-size:.88rem;font-weight:600;border:1.5px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease}
 .tabs button:hover{border-color:var(--accent)}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .rt{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
@@ -247,6 +247,7 @@ td button{min-height:36px}
   .fab:hover svg{transform:none}
 }
 @media(max-width:380px){
+  .tabs button{font-size:.78rem}
   main{padding:16px 12px 110px}
   h1{font-size:1.6rem}
   .amt{font-size:3.6rem}
@@ -254,48 +255,63 @@ td button{min-height:36px}
   .nav{gap:6px}
 }
 
-/* ===== desktop layout ===== */
-html[data-layout="desktop"] main{max-width:1160px;padding:16px 32px 120px}
+/* ===== desktop/tablet layout ===== */
+html[data-layout="desktop"] main{max-width:1160px;padding:16px 16px 120px}
 html[data-layout="desktop"] h1{font-size:1.7rem;margin:2px 0 0}
 html[data-layout="desktop"] .top{margin:0}
-@container (min-width:880px){
-  html[data-layout="desktop"] .bar{position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 -32px 26px;padding:14px 32px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+html[data-layout="desktop"] #vReport{max-width:760px;margin:0 auto}
+html[data-layout="desktop"] .foot{margin-top:40px}
+@container (min-width:720px){
+  html[data-layout="desktop"] main{padding:16px 32px 120px}
+  html[data-layout="desktop"] .bar{position:sticky;top:0;z-index:25;display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 -32px 26px;padding:14px 32px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
   html[data-layout="desktop"] .top .sub{display:none}
-  html[data-layout="desktop"] body h1,html[data-layout="desktop"] h1{font-size:1.7rem}
-  html[data-layout="desktop"] .nav{grid-template-columns:repeat(4,auto);gap:10px;margin:0}
-  html[data-layout="desktop"] .nav a{flex-direction:row;gap:8px;padding:10px 18px;font-size:.92rem;min-height:0}
+  html[data-layout="desktop"] .nav{grid-template-columns:repeat(4,auto);gap:8px;margin:0}
+  html[data-layout="desktop"] .nav a{flex-direction:row;gap:8px;padding:10px 12px;font-size:.88rem;min-height:0}
+  html[data-layout="desktop"] .nav a svg{display:none}
   html[data-layout="desktop"] .nav a[aria-current=page]::after{display:none}
+  html[data-layout="desktop"] h1,html[data-layout="desktop"] body:not([data-page="home"]) h1{font-size:1.35rem}
 
-  /* home */
-  html[data-layout="desktop"] #vHome{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
-  html[data-layout="desktop"] #vHome .plate{grid-column:1/-1;padding:40px 44px}
-  html[data-layout="desktop"] #vHome .amt.s{font-size:3.6rem;max-width:14ch}
-  html[data-layout="desktop"] #vHome .plate small{font-size:1rem}
-  html[data-layout="desktop"] #vHome .btn,html[data-layout="desktop"] #vHome .feat{margin-top:0}
-  html[data-layout="desktop"] #vHome .btn{font-size:1.15rem;min-height:100%}
-  html[data-layout="desktop"] #vHome .feat{padding:22px}
+  html[data-layout="desktop"] #vHome{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+  html[data-layout="desktop"] #vHome .plate{grid-column:1/-1;padding:34px 36px}
+  html[data-layout="desktop"] #vHome .amt.s{font-size:3rem;max-width:16ch}
+  html[data-layout="desktop"] #vHome .btn{grid-column:1/-1;margin-top:0;font-size:1.1rem}
+  html[data-layout="desktop"] #vHome .feat{margin-top:0;padding:20px}
 
-  /* fare checker */
-  html[data-layout="desktop"] #vCalc{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-rows:auto auto 1fr;gap:0 26px;align-items:start}
-  html[data-layout="desktop"] #vCalc>.calcform{grid-column:1;grid-row:1/span 3;margin-top:0;padding:22px}
+  html[data-layout="desktop"] #vCalc{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-rows:auto auto 1fr;gap:0 22px;align-items:start}
+  html[data-layout="desktop"] #vCalc>.calcform{grid-column:1;grid-row:1/span 3;margin-top:0;padding:20px}
   html[data-layout="desktop"] #vCalc>.plate{grid-column:2;grid-row:1}
   html[data-layout="desktop"] #vCalc>.tip{grid-column:2;grid-row:2}
   html[data-layout="desktop"] #vCalc>details{grid-column:2;grid-row:3;margin-top:16px}
   html[data-layout="desktop"] #vCalc>.note{grid-column:1/-1}
-  html[data-layout="desktop"] #vCalc .amt{font-size:5rem}
+  html[data-layout="desktop"] #vCalc .amt{font-size:clamp(3.4rem,8cqi,5rem)}
 
-  /* fare matrix */
-  html[data-layout="desktop"] #vMatrix{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 20px;align-items:center}
-  html[data-layout="desktop"] #vMatrix .search{grid-column:1;max-width:560px}
-  html[data-layout="desktop"] #vMatrix .tabs{grid-column:2;margin:0;width:440px}
+  html[data-layout="desktop"] #vMatrix{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 16px;align-items:center}
+  html[data-layout="desktop"] #vMatrix .search{grid-column:1}
+  html[data-layout="desktop"] #vMatrix .tabs{grid-column:2;margin:0;width:340px}
   html[data-layout="desktop"] #vMatrix>.hint{grid-column:1/-1;margin-top:12px}
   html[data-layout="desktop"] #vMatrix>.note{grid-column:1/-1}
-  html[data-layout="desktop"] #routes{grid-column:1/-1;columns:2;column-gap:18px;margin-top:6px}
+  html[data-layout="desktop"] #routes{grid-column:1/-1;margin-top:6px}
+}
+@container (min-width:900px){
+  html[data-layout="desktop"] #routes{columns:2;column-gap:18px}
   html[data-layout="desktop"] #routes .rt{margin-top:0;margin-bottom:18px;break-inside:avoid}
   html[data-layout="desktop"] #routes .empty{column-span:all}
+  html[data-layout="desktop"] #vMatrix .tabs{width:440px}
 }
-html[data-layout="desktop"] #vReport{max-width:760px;margin:0 auto}
-html[data-layout="desktop"] .foot{margin-top:40px}
+@container (min-width:960px){
+  html[data-layout="desktop"] .bar{gap:24px;padding:14px 32px}
+  html[data-layout="desktop"] h1,html[data-layout="desktop"] body:not([data-page="home"]) h1{font-size:1.7rem}
+  html[data-layout="desktop"] .nav{gap:10px}
+  html[data-layout="desktop"] .nav a{padding:10px 18px;font-size:.92rem}
+  html[data-layout="desktop"] .nav a svg{display:block}
+  html[data-layout="desktop"] #vHome{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  html[data-layout="desktop"] #vHome .plate{padding:40px 44px}
+  html[data-layout="desktop"] #vHome .amt.s{font-size:3.6rem;max-width:14ch}
+  html[data-layout="desktop"] #vHome .btn{grid-column:auto;min-height:100%;font-size:1.15rem}
+  html[data-layout="desktop"] #vHome .feat{padding:22px}
+  html[data-layout="desktop"] #vCalc{gap:0 26px}
+  html[data-layout="desktop"] #vCalc>.calcform{padding:22px}
+}
 /* motion off (setting, or the device’s reduce-motion default) */
 html[data-motion="off"] *,html[data-motion="off"] *::before,html[data-motion="off"] *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[data-motion="off"] .btn:hover,html[data-motion="off"] .fab:hover,html[data-motion="off"] .openmap:hover{transform:none}
@@ -436,7 +452,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     <div class="setrow"><span class="setlab" data-t>Language</span>
       <div class="segc" role="group" aria-label="Language" data-ti><button type="button" data-setlang="fil" aria-pressed="false">Filipino</button><button type="button" data-setlang="en" aria-pressed="true">English</button></div></div>
     <div class="setrow"><span class="setlab" data-t>Layout</span>
-      <div class="segc" role="group" aria-label="Layout" data-ti><button type="button" data-setlayout="mobile" aria-pressed="false" data-t>Mobile</button><button type="button" data-setlayout="desktop" aria-pressed="false" data-t>Desktop</button></div></div>
+      <div class="segc" role="group" aria-label="Layout" data-ti><button type="button" data-setlayout="mobile" aria-pressed="false" data-t>Mobile</button><button type="button" data-setlayout="desktop" aria-pressed="false" data-t>Desktop/Tablet</button></div></div>
     <div class="setrow"><span class="setlab" data-t>Theme</span>
       <div class="segc" role="group" aria-label="Theme" data-ti><button type="button" data-settheme="auto" aria-pressed="true" data-t>Auto</button><button type="button" data-settheme="light" aria-pressed="false" data-t>Light</button><button type="button" data-settheme="dark" aria-pressed="false" data-t>Dark</button></div></div>
     <div class="setrow sw"><div><span class="setlab" data-t>Animations</span><small data-t>Sliding, hover and map effects.</small></div>
@@ -484,8 +500,8 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     }
   }catch(e){}
   var LANG=ST.lang;
-  // first visit: pick the layout that suits the device (touch or small screen = mobile, otherwise desktop); a saved choice wins
-  var LAYOUT=ST.layout||(((window.matchMedia&&matchMedia("(pointer: coarse)").matches)||window.innerWidth<700)?"mobile":"desktop");
+  // first visit: pick the layout that suits the device (phones = mobile; tablets, laptops and desktops = desktop/tablet); a saved choice wins
+  var LAYOUT=ST.layout||(Math.min(screen.width||9999,screen.height||9999,window.innerWidth||9999)<600?"mobile":"desktop");
   var DICT={
     "San Fernando City, La Union tricycle fares. Check before you ride, so you pay what’s fair.":"Mga pamasahe sa tricycle sa San Fernando City, La Union. Alamin bago sumakay para tama ang bayad mo.",
     "Home":"Home","Fare checker":"Fare checker","Fare matrix":"Fare matrix","Complaints":"Reklamo",
@@ -580,7 +596,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
     $("tip").textContent=t("Hand over {0} in total. If the driver asks for more, ask to see the fare matrix before you pay.",peso(r.total));
   }
   $("km").addEventListener("input",function(e){manual();S.km=parseFloat(e.target.value);render()});
-  $("kmNum").addEventListener("input",function(e){var v=parseFloat(e.target.value);if(v>0){manual();S.km=v;render()}});
+  $("kmNum").addEventListener("input",function(e){var v=parseFloat(e.target.value);if(v>0&&v<=1000){manual();S.km=v;render()}});
   $("kmNum").addEventListener("blur",function(e){e.target.value=S.km});
   document.querySelectorAll("[data-s]").forEach(function(b){
     b.addEventListener("click",function(){
@@ -1006,7 +1022,7 @@ html[data-motion="off"] .nav a:hover,html[data-motion="off"] .feat:hover,html[da
    ["South","Poblacion to Pagdalagan","via National Highway",[[1,"Sevilla","DMMMSU"],[2,"Sevilla","Arzadon Automotive"],[3,"Sevilla","BHC"],[4,"Pagdalagan","AR Munar Auto Shop"]]],
    ["East","Dalumpinas Oeste to Bangcusay","via Venflor",[[1,"Dalumpinas Este","Barangay Outpost"],[2,"Bangcusay","Auditorium/Barangay Hall"],[3,"Bangcusay","200 meters after Thank You Arc"]]],
    ["East","Dalumpinas Este to Bangcusay","Old Road",[[1,"Dalumpinas Este","Dalumpinas Este Arc"],[2,"Dalumpinas Este","Barangay Covered Court"],[3,"Bangcusay","Barangay Hall"]]],
-   ["East","Poblacion to Camansi",[[1,"Cabaroan","Rosa Galvez Apartment (Road to Pusuak)"],[2,"Santiago","ORT"],[3,"Langcuas","Waiting Shed to Eastville Subdivison"],[4,"Camansi","Police Substation"]]],
+   ["East","Poblacion to Camansi",[[1,"Cabaroan","Rosa Galvez Apartment (Road to Pusuak)"],[2,"Santiago","ORT"],[3,"Langcuas","Waiting Shed to Eastville Subdivision"],[4,"Camansi","Police Substation"]]],
    ["East","Poblacion to Mameltac","via Dallangayan Oeste",[[1,"Cabaroan","Road to Pusuak"],[2,"Santiago","Jobelle Yanila’s Residence"],[3,"Dallangayan Oeste","Waiting Shed/Road going to the Christian Spirit in the Phils. Inc."],[4,"Mameltac","Kuya’s Junkshop (right after the Engineered Sanitary Landfill Facility)"]]],
    ["East","Poblacion to Namtutan","via Dallangayan Este",[[1,"Cabaroan","Road Going to Pusuak"],[2,"Santiago Norte","Jobelle Yanila’s Residence"],[3,"Dallangayan Este","Balanon’s Store"],[4,"Namtutan","Bamboo Tree"],[4.8,"Namtutan","End of the Road"]]],
    ["East","Poblacion to Saoay","via Dallangayan Este",[[1,"Cabaroan","Road Going to Pusuak"],[2,"Santiago Norte","Jobelle Yanila’s Residence"],[3,"Dallangayan Este","Balanon’s Store"],[4,"Dallangayan Este","Crossing"],[4.6,"Dallangayan Este","Crossing going to Saoay"]]],
